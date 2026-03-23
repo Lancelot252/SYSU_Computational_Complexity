@@ -1,1 +1,3 @@
 # SYSU_Computational_Complexity
+
+本项目为中山大学计算机学院2026年计算复杂性专业选修课的小组作业存储仓库。

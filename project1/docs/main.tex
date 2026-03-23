@@ -1,0 +1,92 @@
+﻿% 中山大学科技类及IT类实验报告文档类(LaTeX模板)
+\documentclass{sysucseexp}
+\usepackage{fontspec,inconsolata,url}
+\setmainfont{Times New Roman}
+\setmonofont{Consolas}
+
+% 载入需要的宏包
+\input{settings/packages.tex}
+% 进行必要的设置
+\input{settings/format.tex}
+% 专用术语宏命令进行必要的设置
+\input{settings/terms.tex}
+
+% 设置封面基本信息，\linebreak 前面不要有空格，
+% 中文之间的空格无法消除
+% 另，在\sysucseset中不可以出现空行
+\sysucseset{
+  college = {计算机学院},            % 学院名称
+  projname = {计算复杂性理论实验},       % 实践课程名称
+  title = {实验报告标题},    % 实验报告题目
+  stunoleader = {2333xxxx},              % 组长学号
+  authorleader = {刘昊},             % 组长姓名
+  stunoone = {23336203},              % 组员1学号
+  authorone = {任意嵘},             % 组员1姓名
+  stunotwo = {2333xxxx},              % 组员2学号
+  authortwo = {彭怡萱},             % 组员2姓名
+  major = {计算机科学与技术},          % 专业
+  adviser = {冯剑琳},                   % 指导教师姓名
+  startdate = {2026年3月23日},        % 实验起始日期
+  enddate = {4月3日}        % 实验结束日期
+}
+
+\begin{document} %在document环境中撰写文档
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 封面及目录，无需改动此处代码
+\makecover
+% 目录
+\tableofcontents
+\cleardoublepage
+% 设置正文页眉页脚格式，并重新设置页码为1
+\pagestyle{main} % 无页眉，页码在页脚居中
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% 排版正文内容
+\section{实验目的与要求}
+
+本次编程作业要求同学们以小组为单位，编写 Python 程序实现 \texttt{tm2.ppt} 中的图灵机编码、多带图灵机以及通用图灵机，并以两数加法图灵机 ADD 为测试用例进行测试。这三个部分的实现并不割裂，应当在同一个 Python 程序中组合完成整个工作流。
+
+具体的核心要求如下：
+\begin{enumerate}
+    \item \textbf{图灵机编码模块}
+    \begin{itemize}
+        \item 读取定义图灵机的 JSON 文件，并将其转换为二进制编码。
+        \item 按照特定的规则，将元素映射为正整数：例如将图灵机的状态 $q_i$、符号 $X_j$ 和移动方向 $D_m$ 等映射之后，用 $0$ 的数量表示大小，元素间由 $1$ 隔开，最终转为由 $0$ 和 $1$ 构成的二进制字符串。
+    \end{itemize}
+
+    \item \textbf{多带图灵机模块}
+    \begin{itemize}
+        \item 实现一个多带图灵机模拟器，模拟实现多条磁带、多磁头的独立工作以及状态转移操作。
+        \item \textbf{实时展示运行过程}：在多带图灵机的运行过程中，需要在屏幕上实时格式化打印出当前状态、各条磁带的内容（含边界分隔符等），以及各个磁头的位置。
+        \item \textbf{执行模式控制}：程序应当支持两种展示模式：
+        \begin{enumerate}
+            \item \textbf{交互式}：图灵机每一步状态转移后，等待用户敲击空格键后继续下一步运行。
+            \item \textbf{自动式}：图灵机每一步状态转移后，等待可配置的固定时间（例如 0.5 秒）后自动继续下一步运行。
+        \end{enumerate}
+    \end{itemize}
+
+    \item \textbf{通用图灵机（UTM）模块}
+    \begin{itemize}
+        \item 基于多带图灵机的代码，实现通用图灵机模拟。
+        \item 设定 UTM 初始状态下第一条磁带（Tape 1）包含完整输入 $M 111 w$。其中 $M$ 为通过编码模块获得的被模拟图灵机编码，$w$ 为该图灵机的输入字符串。
+        \item 模拟时，Tape 2 专门用于存放模拟图灵机 $M$ 的纸带并标记 $M$ 的磁头位置；Tape 3 专门用于保存 $M$ 当前的状态。
+        \item 为了简化实现，允许假定输入给通用图灵机的代码总是合法的，省略并跳过初始的合法性检查步骤（Step 1）。
+        \item 除了多带图灵机常规的纸带实时打印外，还需在每次状态切换时根据 \texttt{tm2.ppt} 中的步骤，打印出\textbf{当前所处的运行阶段的完整说明文本}。
+    \end{itemize}
+
+    \item \textbf{用例测试}
+    \begin{itemize}
+        \item 构造 \texttt{tm more examples.pdf} 中两数加法图灵机 ADD 的 JSON 定义文件作为输入。
+        \item 根据 JSON 里 \texttt{input} 字段（如 \texttt{["00", "000"]}，即分别代表输入 2 和 3 的一进制编码），执行 UTM 运转测试。
+    \end{itemize}
+\end{enumerate}
+
+\section{模块设计思路}
+
+\section{关键代码展示}
+
+\section{运行结果展示}
+
+\end{document}
+
