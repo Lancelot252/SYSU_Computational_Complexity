@@ -3,8 +3,17 @@
 \contentsline {section}{\numberline {一、}实验目的与要求}{1}{section.1}%
 \addvspace {3ex}
 \contentsline {section}{\numberline {二、}模块设计思路}{1}{section.2}%
+\contentsline {subsection}{\numberline {(1)}图灵机编码模块}{1}{subsection.2.1}%
+\contentsline {subsection}{\numberline {(2)}多带图灵机模块（待完成）}{2}{subsection.2.2}%
+\contentsline {subsection}{\numberline {(3)}通用图灵机模块（待完成）}{2}{subsection.2.3}%
 \addvspace {3ex}
-\contentsline {section}{\numberline {三、}关键代码展示}{1}{section.3}%
+\contentsline {section}{\numberline {三、}关键代码展示}{2}{section.3}%
+\contentsline {subsection}{\numberline {(1)}图灵机编码：转移序列的确定性多键排序}{2}{subsection.3.1}%
+\contentsline {subsection}{\numberline {(2)}图灵机编码：防冲突的状态 ID 映射逻辑}{3}{subsection.3.2}%
+\contentsline {subsection}{\numberline {(3)}图灵机编码：一进制翻译核心封装}{4}{subsection.3.3}%
+\contentsline {subsection}{\numberline {(4)}多带图灵机与通用图灵机核心代码（待完成）}{4}{subsection.3.4}%
 \addvspace {3ex}
-\contentsline {section}{\numberline {四、}运行结果展示}{1}{section.4}%
+\contentsline {section}{\numberline {四、}运行结果展示}{4}{section.4}%
+\contentsline {subsection}{\numberline {(1)}图灵机编码模块测试}{4}{subsection.4.1}%
+\contentsline {subsection}{\numberline {(2)}多带与通用图灵机功能测试（待完成）}{5}{subsection.4.2}%
 \contentsfinish 
