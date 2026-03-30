@@ -1,0 +1,92 @@
+{
+  "S0": {
+    "0": {
+      "write": "0",
+      "move": "right",
+      "nextState": "S0"
+    },
+    "1": {
+      "write": "1",
+      "move": "right",
+      "nextState": "S0"
+    },
+    "#": {
+      "write": "#",
+      "move": "right",
+      "nextState": "S0"
+    },
+    " ": {
+      "write": " ",
+      "move": "left",
+      "nextState": "S1"
+    }
+  },
+  "S1": {
+    "0": {
+      "write": "1",
+      "move": "left",
+      "nextState": "S1"
+    },
+    "1": {
+      "write": "0",
+      "move": "stay",
+      "nextState": "S2"
+    },
+    "#": {
+      "write": " ",
+      "move": "right",
+      "nextState": "S4"
+    }
+  },
+  "S2": {
+    "0": {
+      "write": "0",
+      "move": "left",
+      "nextState": "S2"
+    },
+    "1": {
+      "write": "1",
+      "move": "left",
+      "nextState": "S2"
+    },
+    "#": {
+      "write": "#",
+      "move": "left",
+      "nextState": "S3"
+    }
+  },
+  "S3": {
+    "1": {
+      "write": "0",
+      "move": "left",
+      "nextState": "S3"
+    },
+    "0": {
+      "write": "1",
+      "move": "stay",
+      "nextState": "S0"
+    },
+    " ": {
+      "write": "1",
+      "move": "stay",
+      "nextState": "S0"
+    }
+  },
+  "S4": {
+    "0": {
+      "write": " ",
+      "move": "right",
+      "nextState": "S4"
+    },
+    " ": {
+      "write": " ",
+      "move": "stay",
+      "nextState": "H"
+    }
+  },
+  "H": {},
+  "input": [
+    "00",
+    "000"
+  ]
+}
