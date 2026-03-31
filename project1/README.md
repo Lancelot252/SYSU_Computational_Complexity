@@ -1,108 +1,255 @@
-# Project 1
+# 计算复杂性第一次编程作业 - 图灵机模拟器
+
+## 项目概述
+
+本项目实现了图灵机编码、多带图灵机模拟器和通用图灵机模拟器，使用Python语言编写。
 
 ## 项目结构
 
-```text
-src/
-  main.py
-  cli/
-  core/
-  modules/
-test/
-  *.json
-docs/
-README.md
+```
+project1/
+├── src/                    # 源代码目录
+│   ├── main.py             # 程序入口
+│   ├── cli/                # 命令行接口
+│   │   ├── __init__.py
+│   │   └── app.py          # CLI应用
+│   ├── core/               # 核心模块
+│   │   ├── __init__.py
+│   │   ├── models.py       # 数据模型定义
+│   │   ├── errors.py       # 错误定义
+│   │   ├── json_utils.py   # JSON工具
+│   │   └── samples.py      # 样例管理
+│   └── modules/            # 功能模块
+│   │       ├── __init__.py
+│   │       ├── encoding.py # 图灵机编码模块（成员A）
+│   │       ├── multitape.py# 多带图灵机模块（成员B/C）
+│   │       └── utm.py      # 通用图灵机模块（成员C）
+├── test/                   # 测试用例目录
+│   ├── sample_tm.json      # 示例图灵机
+│   └── add_tm.json         # ADD加法图灵机
+├── docs/                   # 实验报告目录
+│   └── report.pdf          # 实验报告
+└── README.md               # 本文件
 ```
 
-- `src/main.py`：统一命令行入口。
-- `src/cli/`：命令行参数解析、交互式样例选择与输出控制。
-- `src/core/`：共享基础能力，包括 JSON 读取、样例发现、错误处理和统一数据模型。
-- `src/modules/`：各功能模块实现，目前只完成图灵机编码模块，并为多带图灵机、通用图灵机预留扩展位。
-- `test/`：共享测试样例库，只存放 JSON 文件。同一份样例将被编码模块、多带图灵机模块和通用图灵机模块复用。
+## 功能模块
 
-## 当前已实现功能
+### 1. 图灵机编码模块
 
-当前程序已实现：
+将定义图灵机的JSON文件转换为二进制编码。
 
-- 共享测试样例自动发现
-- 图灵机编码模块
-- 统一 CLI 入口
-- `multitape` 和 `utm` 的命令预留位
-- 默认启动后循环显示主菜单，直到手动选择退出
+**编码规则**：
+- 每个转移规则编码格式：`状态ID(一进制) 1 符号ID(一进制) 1 下一状态ID(一进制) 1 写入符号ID(一进制) 1 方向ID(一进制)`
+- 转移之间用 `11` 分隔
+- 方向ID：`left=1, right=2, stay=3`
+- 一进制编码：数字n用n个0表示
 
-当前尚未实现：
+### 2. 多带图灵机模块
 
-- 多带图灵机模拟
-- 通用图灵机模拟
+模拟多带图灵机的运行过程。
 
-## 共享样例格式
+**功能**：
+- 支持多条磁带和多个磁头
+- 支持状态转移
+- 支持交互式和自动两种展示模式
+- 磁带显示格式：`_____ABC*ACB_____`（`*`表示磁头位置）
 
-测试样例采用统一 JSON 结构：
+### 3. 通用图灵机模块
 
+基于多带图灵机实现通用图灵机模拟器。
+
+**三条磁带**：
+- Tape1：存储 `M111w`（被模拟图灵机的编码和输入）
+- Tape2：模拟被模拟图灵机的磁带
+- Tape3：存储当前状态
+
+**运行阶段**：
+- Step 2：分析M确定符号表示长度
+- Step 3：初始化磁带
+- 搜索匹配转移
+- 执行转移
+- 接受/拒绝
+
+## 使用方法
+
+### 运行程序
+
+```bash
+cd project1/src
+python main.py
+```
+
+### 命令列表
+
+#### 1. 列出测试样例
+
+```bash
+python main.py list
+```
+
+#### 2. 图灵机编码
+
+```bash
+# 基本编码
+python main.py encode --sample add_tm.json
+
+# 详细输出
+python main.py encode --sample add_tm.json --details
+```
+
+#### 3. 运行多带图灵机
+
+```bash
+# 交互式模式
+python main.py multitape --mode interactive
+
+# 自动模式
+python main.py multitape --mode auto --interval 0.5
+
+# 使用配置文件
+python main.py multitape --config config.json --mode auto
+```
+
+#### 4. 运行通用图灵机
+
+```bash
+# 交互式模式
+python main.py utm --sample add_tm.json --mode interactive
+
+# 自动模式
+python main.py utm --sample add_tm.json --mode auto --interval 0.1
+
+# 详细输出
+python main.py utm --sample add_tm.json --details --mode auto
+
+# 设置最大步数
+python main.py utm --sample add_tm.json --max-steps 1000
+```
+
+### 交互式菜单
+
+不带参数运行程序会进入交互式菜单：
+
+```bash
+python main.py
+```
+
+菜单选项：
+1. 列出 test 目录下的共享 JSON 样例
+2. 对选定样例执行图灵机编码
+3. 运行多带图灵机模拟器
+4. 运行通用图灵机模拟器
+5. 退出程序
+
+## 测试用例
+
+### ADD图灵机 (`test/add_tm.json`)
+
+两数加法图灵机，计算两个一进制数的和。
+
+**输入格式**：
 ```json
 {
-  "<state-name>": {
-    "<read-symbol>": {
-      "write": "<write-symbol>",
-      "move": "<right|left|stay>",
-      "nextState": "<next-state-name>"
-    }
-  },
-  "input": ["<input-string-1>", "<input-string-2>"]
+  "input": ["00", "000"]  // 代表 2 + 3
 }
 ```
 
-说明：
+**预期结果**：磁带上留下 `00000`（代表5）
 
-- 除 `input` 外，其余顶层键均视为状态名。
-- `input` 字段用于保存共享测试输入，编码模块会自动忽略该字段。
-- 后续多带图灵机和通用图灵机模块将直接复用同一份样例定义与 `input` 数据。
+### 示例图灵机 (`test/sample_tm.json`)
 
-## 编码规则
+一个简单的图灵机示例。
 
-图灵机编码模块采用如下规则：
+## JSON文件格式
 
-- 状态名若形如 `qN`，则状态编号为 `N`；其他状态名按字典序分配未使用的正整数编号。
-- 符号编号固定为：`0 -> 1`，`1 -> 2`，空白符 `" " -> 3`；其他符号按字典序从 `4` 开始编号。
-- 方向编号固定为：`left -> 1`，`right -> 2`，`stay -> 3`。
-- 单条转移 `(q_i, X_j) -> (q_k, X_l, D_m)` 编码为 `0^i 1 0^j 1 0^k 1 0^l 1 0^m`。
-- 所有转移在编号后按 `(当前状态, 读取符号, 下一状态, 写入符号, 移动方向)` 排序，并使用 `11` 连接成整台图灵机的编码结果。
-
-## 命令行使用方法
-
-列出全部共享样例：
-
-```bash
-python src/main.py list
+```json
+{
+  "q1": {
+    "0": {
+      "write": "1",
+      "move": "right",
+      "nextState": "q2"
+    },
+    " ": {
+      "write": " ",
+      "move": "left",
+      "nextState": "halt"
+    }
+  },
+  "halt": {},
+  "input": ["00", "000"]
+}
 ```
 
-直接启动并进入循环菜单：
+**字段说明**：
+- 状态名：如 `q1`, `q2`, `halt`
+- 读取符号：触发转移的符号
+- `write`：写入的符号
+- `move`：移动方向（`left`, `right`, `stay`）
+- `nextState`：下一状态
+- `input`：输入字符串列表
 
-```bash
-python src/main.py
+## 运行示例
+
+### 编码ADD图灵机
+
+```
+$ python main.py encode --sample add_tm.json --details
+
+编码结果：
+{
+  "encoding": "010101010011010010100100...",
+  "state_ids": {"q1": 1, "q2": 2, ..., "halt": 8},
+  "symbol_ids": {"0": 1, "1": 2, " ": 3},
+  "transitions": [21个转移规则]
+}
 ```
 
-对指定样例执行编码：
+### 运行UTM
 
-```bash
-python src/main.py encode --sample sample_tm.json
+```
+$ python main.py utm --sample add_tm.json --mode auto
+
+============================================================
+UTM 初始化
+============================================================
+当前阶段说明：Step 2: The UTM examines M...
+
+============================================================
+初始状态
+============================================================
+Tape1 (M111w): _____{编码}11100 000_____
+Tape2 (模拟磁带): _____00 000_____
+Tape3 (状态): _____0_____
+
+...
+
+============================================================
+运行结束
+============================================================
+结果：接受 (ACCEPTED)
+总步数：6
 ```
 
-不指定样例时进入交互式选择：
+## 依赖
 
-```bash
-python src/main.py encode
-```
+- Python 3.8+
+- 无需额外依赖库
 
-输出编码明细：
+## 分工说明
 
-```bash
-python src/main.py encode --sample sample_tm.json --details
-```
+| 成员 | 主要职责 |
+|------|----------|
+| 成员A（任意嵘） | 图灵机编码模块 + 测试用例构造 |
+| 成员B（彭怡萱） | 多带图灵机模块 + 运行展示 |
+| 成员C（刘昊） | 通用图灵机模块 + 整体集成 |
 
-预留命令：
+## 作者
 
-```bash
-python src/main.py multitape
-python src/main.py utm
-```
+- 成员A：编码模块
+- 成员B：多带图灵机模块
+- 成员C：UTM模块、整体集成
+
+## 许可证
+
+本项目仅用于教学目的。

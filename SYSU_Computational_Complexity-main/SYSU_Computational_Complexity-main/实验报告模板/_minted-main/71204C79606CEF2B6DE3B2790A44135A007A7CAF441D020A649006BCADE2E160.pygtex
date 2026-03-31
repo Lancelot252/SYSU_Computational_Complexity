@@ -1,6 +1,0 @@
-\begin{Verbatim}[commandchars=\\\{\}]
-xelatex \PYGZhy{}shell\PYGZhy{}escape main.tex
-biber main
-xelatex \PYGZhy{}shell\PYGZhy{}escape main.tex
-xelatex \PYGZhy{}shell\PYGZhy{}escape main.tex
-\end{Verbatim}
