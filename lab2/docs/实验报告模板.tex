@@ -1,0 +1,369 @@
+% !TeX program = xelatex
+% !TeX encoding = UTF-8
+% ============================================================
+% 实验报告LaTeX模板
+% ============================================================
+
+\documentclass[a4paper]{article}
+
+% ==================== 宏包引用 ====================
+% 中文支持
+\usepackage[UTF8]{ctex}
+
+% 页面设置
+\usepackage[a4paper,margin=1in]{geometry}
+
+% 图片相关
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{adjustbox}
+\usepackage{subcaption}
+
+% 代码环境
+\usepackage{listings}
+\usepackage{inconsolata} % 等宽字体
+
+% 表格相关
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+
+% 超链接
+\usepackage{hyperref}
+
+% 页眉页脚
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+
+% 颜色支持
+\usepackage{color}
+\usepackage[dvipsnames,table,xcdraw]{xcolor}
+
+% 段落格式
+\usepackage{indentfirst}        % 首段缩进
+\setlength{\parindent}{2em}     % 缩进2字符
+
+% 中文编号
+\usepackage{zhnumber}
+
+% 数学公式
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% 彩色文本框
+\usepackage[many]{tcolorbox}
+
+% 列表样式
+\usepackage{enumitem}
+
+% 字体设置
+\usepackage{xeCJK}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+% 绘图
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+
+% ==================== 列表样式设置 ====================
+% 全局设置（影响所有级别）
+\setlist[itemize]{
+    itemsep=2pt,
+    topsep=4pt,
+    parsep=1pt,
+    leftmargin=3em
+}
+
+% 仅设置第一级（最高级）
+\setlist[itemize,1]{
+    label=\textbullet,
+    font=\color{black}\heiti,
+    before={\color{black}\heiti}
+}
+
+% 重置第二级及更深级别
+\setlist[itemize,2]{
+    label=\textbullet,
+    font=\color{black}\heiti,
+    before={\color{black}\heiti},
+    leftmargin=*
+}
+\setlist[itemize,3]{
+    label=\textbullet,
+    font=\color{black}\heiti,
+    before={\color{black}\heiti},
+    leftmargin=*
+}
+
+% ==================== 自定义环境 ====================
+% 定义可分页的引用环境
+\newtcolorbox[auto counter]{myquote}[1][]{
+    colback=gray!5,
+    colframe=gray!30,
+    left=5mm, right=5mm,
+    top=3mm, bottom=3mm,
+    width=0.85\textwidth,
+    center,
+    arc=0mm,
+    boxrule=0.5pt,
+    fontupper=\small\linespread{1.1}\selectfont,
+    before upper={\parindent2em\color{black!40!blue}\itshape\small\kaishu},
+    #1
+}
+
+% ==================== 文档元信息 ====================
+% 请根据实际情况修改以下信息
+\newcommand{\college}{中山大学计算机学院}
+\newcommand{\projname}{实验报告标题}
+\newcommand{\reporttitle}{实验名称}
+\newcommand{\groupno}{第X组}
+\newcommand{\authorname}{刘昊}
+\newcommand{\major}{计算机专业}
+\newcommand{\adviser}{指导教师}
+\newcommand{\startdate}{YYYY年MM月DD日}
+\newcommand{\labenddate}{YYYY年MM月DD日}
+\newcommand{\labroom}{实验地点}
+
+% ==================== 页眉页脚设置 ====================
+\pagestyle{fancy}
+\fancyhf{}
+
+% 设置页眉
+\fancyhead[L]{\kaishu \projname}
+\fancyhead[C]{\kaishu \reporttitle}
+\fancyhead[R]{\kaishu \authorname}
+
+% 设置页脚
+\fancyfoot[C]{第 \thepage 页，共 \pageref{LastPage} 页}
+
+% 页眉页脚分隔线
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% ==================== 颜色定义 ====================
+\definecolor{mybgcolor}{RGB}{0, 0, 0}
+\definecolor{NavyBlue}{RGB}{0,0,128}
+
+% ==================== 代码样式设置 ====================
+\lstset{
+    language=C,
+    basicstyle=\footnotesize\ttfamily,
+    breaklines=true,
+    keywordstyle=\bfseries\color{blue},
+    morekeywords={},
+    emph={},
+    emphstyle=\bfseries\color{Rhodamine},
+    commentstyle=\itshape\color{green!50!black},
+    stringstyle=\bfseries\color{PineGreen!90!black},
+    columns=fullflexible,
+    numbers=left,
+    numbersep=2em,
+    numberstyle=\footnotesize\color{gray},
+    frame=single,
+    framesep=1em,
+    showstringspaces=false,
+    keepspaces=true,
+    backgroundcolor=\color{gray!5},
+    xleftmargin=0.2\linewidth,
+    xrightmargin=0.08\linewidth,
+    captionpos=b,
+    aboveskip=1em,
+    belowskip=1em,
+}
+
+% ==================== 文档开始 ====================
+\begin{document}
+
+% ==================== 封面页 ====================
+\begin{titlepage}
+    \centering
+    
+    % 校徽图片（请确保图片路径正确）
+    \includegraphics[width=10cm]{img/SYSULogo.png}
+
+    \vspace{1em}
+    % {\Large \college \par}
+    \vspace{1em}
+    {\Large \kaishu \projname \par}
+    \vspace{3em}
+
+    {\fontsize{40pt}{42pt}\kaishu \selectfont \boldmath \reporttitle\par}
+    \vspace*{\fill}
+
+    \begin{center}
+    {\Large
+    \makebox[5em][s]{姓名}:\underline{\makebox[15em][c]{\kaishu \authorname}}\\[0.5em]
+    \makebox[5em][s]{专业}:\underline{\makebox[15em][c]{\kaishu \major}}\\[1em]
+    \makebox[5em][s]{课程教师}:\underline{\makebox[15em][c]{\kaishu \adviser}}\\[1em]
+    \makebox[5em][s]{起始日期}:\underline{\makebox[15em][c]{\kaishu \startdate}}\\[1em]
+    \makebox[5em][s]{结束日期}:\underline{\makebox[15em][c]{\kaishu \labenddate}}\\[1em]
+    \makebox[5em][s]{实验地点}:\underline{\makebox[15em][c]{\kaishu \labroom}}
+    }
+    \end{center}
+
+    \vspace*{\fill}
+\end{titlepage}
+
+% ==================== 目录 ====================
+\tableofcontents
+\newpage
+
+% ==================== 正文部分 ====================
+
+\section{实验概述}
+
+\subsection{实验目标}
+\begin{itemize}
+    \item 目标1：在此填写实验目标
+    \item 目标2：在此填写实验目标
+    \item 目标3：在此填写实验目标
+\end{itemize}
+
+\noindent \textbf{实验内容}
+\begin{itemize}
+    \item 内容1：在此填写实验内容
+    \item 内容2：在此填写实验内容
+    \item 内容3：在此填写实验内容
+\end{itemize}
+
+% 图片示例（单图）- 请确保图片文件存在后取消注释
+% \begin{figure}[H]
+%     \centering
+%     \adjustbox{
+%         max width=0.8\linewidth,
+%         max height=0.6\textheight,
+%         min width=1cm,
+%         min height=1cm,
+%         keepaspectratio
+%     }{
+%         \includegraphics{img/example.png}
+%     }
+%     \caption{图片标题}
+% \end{figure}
+
+% 图片示例（双图并排）- 请确保图片文件存在后取消注释
+% \begin{figure}[H]
+%     \centering
+%     \begin{minipage}[t]{0.48\textwidth}
+%         \centering
+%         \adjustbox{
+%             max width=1.05\linewidth,
+%             max height=0.45\textheight,
+%             min width=1cm,
+%             min height=1cm,
+%             keepaspectratio
+%         }{
+%             \includegraphics{img/example1.png}
+%         }
+%         \subcaption{左图标题}
+%     \end{minipage}
+%     \hfill
+%     \begin{minipage}[t]{0.48\textwidth}
+%         \centering
+%         \adjustbox{
+%             max width=1\linewidth,
+%             max height=0.45\textheight,
+%             min width=1cm,
+%             min height=1cm,
+%             keepaspectratio
+%         }{
+%             \includegraphics{img/example2.png}
+%         }
+%         \subcaption{右图标题}
+%     \end{minipage}
+%     \caption{总标题}
+% \end{figure}
+
+\subsection{实验思考}
+\begin{itemize}
+    \item 思考题1：在此填写思考题
+    \item 思考题2：在此填写思考题
+    \item 思考题3：在此填写思考题
+\end{itemize}
+
+\newpage
+
+\section{实验原理}
+
+\subsection{原理概述}
+在此填写实验原理的详细说明。
+
+\subsection{核心概念}
+在此填写核心概念的说明。
+
+% 表格示例
+\begin{table}[htbp]
+\centering
+\label{tab:example}
+\begin{tabular}{|>{\raggedright\arraybackslash}p{0.25\textwidth}|>{\raggedright\arraybackslash}p{0.65\textwidth}|}
+\hline
+\textbf{项目} & \textbf{说明} \\
+\hline
+项目1 & 项目1的详细说明。\\
+\hline
+项目2 & 项目2的详细说明。\\
+\hline
+项目3 & 项目3的详细说明。\\
+\hline
+\end{tabular}
+\caption{表格标题}
+\end{table}
+
+\newpage
+
+\section{实验步骤与结果}
+
+\subsection{【步骤一】步骤名称}
+在此填写实验步骤的详细说明。
+
+% 代码示例
+\begin{figure}[H]
+  \centering
+  \begin{minipage}[t]{0.48\textwidth}
+    \begin{lstlisting}[language=C, xleftmargin=0pt]
+// 代码示例1
+// 在此填写代码
+    \end{lstlisting}
+    \subcaption{代码标题1}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.48\textwidth}
+    \begin{lstlisting}[language=C, xleftmargin=0pt]
+// 代码示例2
+// 在此填写代码
+    \end{lstlisting}
+    \subcaption{代码标题2}
+  \end{minipage}
+  \caption{代码总标题}
+\end{figure}
+
+\subsection{【步骤二】步骤名称}
+在此填写实验步骤的详细说明。
+
+\subsubsection{子步骤名称}
+在此填写子步骤的详细说明。
+
+% 引用环境示例
+\begin{myquote}[colback=blue!5!white,colframe=blue!75!black,title=引用标题]
+在此填写引用内容或重要说明。
+\end{myquote}
+
+\newpage
+
+\section{实验总结}
+
+\subsection{实验结果}
+在此填写实验结果的总结。
+
+\subsection{心得体会}
+在此填写实验心得体会。
+
+\newpage
+
+% ==================== 参考文献 ====================
+\begin{thebibliography}{99}
+    \bibitem{ref1}作者. (年份). 文献标题. \url{https://example.com}
+    \bibitem{ref2}作者. (年份). 文献标题. 出版社.
+\end{thebibliography}
+
+\end{document}

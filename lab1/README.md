@@ -50,5 +50,3 @@ python main.py run --input test/sample_tm.json
 python main.py utm --input test/sample_tm.json
 ```
 
-## 作者
-- 刘昊

@@ -44,8 +44,6 @@ SYSU_Computational_Complexity/
 - 3SAT到Independent Set归约
 - 可视化工具
 
-## 作者
-- 刘昊
 
 ## 仓库地址
 https://github.com/Lancelot252/SYSU_Computational_Complexity
