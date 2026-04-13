@@ -1,0 +1,68 @@
+# Python缓存文件
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+
+# IDE文件
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 测试输出
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# 虚拟环境
+venv/
+env/
+.venv/
+ENV/
+
+# 分发/打包
+dist/
+build/
+*.egg-info/
+*.egg
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# 本地配置
+.env
+.env.local
+
+# 日志文件
+*.log
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+
+# 要求文档（不推送）
+要求文档/
+*.pdf
+*.ppt
+*.pptx
+
+# LaTeX编译产物
+*.aux
+*.bcf
+*.log
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+*.listing
+*.fls
+*.fdb_latexmk
+_minted-*/
+
+# 压缩文件
+*.zip
