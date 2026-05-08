@@ -350,3 +350,156 @@ def parse_dimacs_string(s: str) -> Formula3SAT:
             raise ValueError(f"子句必须恰好包含3个文字，但收到了{len(literals)}个")
     
     return Formula3SAT(clauses)
+
+
+def parse_txt_file(file_path: str) -> Formula3SAT:
+    """
+    解析txt格式的3SAT公式文件
+    
+    这是本次作业规定的输入格式：
+    - 每一行表示一个子句
+    - 每一行包含恰好3个文字，以空格分隔
+    - 正文字直接写变量名，例如 x
+    - 负文字在变量名前加 -，例如 -x 表示 ¬x
+    
+    Args:
+        file_path: txt文件路径
+        
+    Returns:
+        解析后的Formula3SAT对象
+        
+    Raises:
+        FileNotFoundError: 如果文件不存在
+        ValueError: 如果文件格式无效或子句不包含恰好3个文字
+        
+    Examples:
+        假设文件内容为:
+        x y z
+        -x -y -z
+        x -y z
+        -x y -z
+        
+        >>> formula = parse_txt_file("test.txt")
+        >>> print(formula)
+        (x ∨ y ∨ z) ∧ (¬x ∨ ¬y ∨ ¬z) ∧ (x ∨ ¬y ∨ z) ∧ (¬x ∨ y ∨ ¬z)
+    """
+    clauses: List[Clause] = []
+    
+    with open(file_path, 'r', encoding='utf-8') as f:
+        for line_num, line in enumerate(f, 1):
+            line = line.strip()
+            
+            # 跳过空行
+            if not line:
+                continue
+            
+            # 解析文字
+            parts = line.split()
+            
+            if len(parts) != 3:
+                raise ValueError(
+                    f"第{line_num}行: 子句必须恰好包含3个文字，"
+                    f"但收到了{len(parts)}个: '{line}'"
+                )
+            
+            literals: List[Literal] = []
+            for part in parts:
+                literal = _parse_txt_literal(part, line_num)
+                literals.append(literal)
+            
+            clauses.append(Clause(literals))
+    
+    if not clauses:
+        raise ValueError("文件中没有有效的子句")
+    
+    return Formula3SAT(clauses)
+
+
+def _parse_txt_literal(lit_str: str, line_num: int) -> Literal:
+    """
+    解析txt格式中的单个文字
+    
+    Args:
+        lit_str: 文字字符串，如 "x", "-x"
+        line_num: 行号（用于错误报告）
+        
+    Returns:
+        解析后的Literal对象
+        
+    Raises:
+        ValueError: 如果文字格式无效
+    """
+    lit_str = lit_str.strip()
+    
+    if not lit_str:
+        raise ValueError(f"第{line_num}行: 文字不能为空")
+    
+    # 检测否定符号
+    negated = False
+    variable = lit_str
+    
+    # txt格式使用 - 作为否定符号
+    if variable.startswith('-'):
+        negated = True
+        variable = variable[1:].strip()
+    
+    if not variable:
+        raise ValueError(f"第{line_num}行: 无效的文字格式: '{lit_str}'")
+    
+    # 验证变量名（只允许字母、数字和下划线）
+    if not re.match(r'^[a-zA-Z_][a-zA-Z0-9_]*$', variable):
+        raise ValueError(f"第{line_num}行: 无效的变量名: '{variable}'")
+    
+    return Literal(variable, negated)
+
+
+def parse_txt_string(s: str) -> Formula3SAT:
+    """
+    解析txt格式的3SAT公式字符串
+    
+    与parse_txt_file功能相同，但接受字符串输入而非文件路径。
+    
+    Args:
+        s: txt格式的公式字符串
+        
+    Returns:
+        解析后的Formula3SAT对象
+        
+    Raises:
+        ValueError: 如果字符串格式无效
+        
+    Examples:
+        >>> s = "x y z\\n-x -y -z\\nx -y z"
+        >>> formula = parse_txt_string(s)
+        >>> print(formula)
+        (x ∨ y ∨ z) ∧ (¬x ∨ ¬y ∨ ¬z) ∧ (x ∨ ¬y ∨ z)
+    """
+    clauses: List[Clause] = []
+    
+    for line_num, line in enumerate(s.split('\n'), 1):
+        line = line.strip()
+        
+        # 跳过空行
+        if not line:
+            continue
+        
+        # 解析文字
+        parts = line.split()
+        
+        if len(parts) != 3:
+            raise ValueError(
+                f"第{line_num}行: 子句必须恰好包含3个文字，"
+                f"但收到了{len(parts)}个: '{line}'"
+            )
+        
+        literals: List[Literal] = []
+        for part in parts:
+            literal = _parse_txt_literal(part, line_num)
+            literals.append(literal)
+        
+        clauses.append(Clause(literals))
+    
+    if not clauses:
+        raise ValueError("字符串中没有有效的子句")
+    
+    return Formula3SAT(clauses)

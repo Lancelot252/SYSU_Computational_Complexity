@@ -173,15 +173,27 @@ class Literal:
     """表示一个文字（变量或其否定）"""
     variable: str      # 变量名
     negated: bool      # 是否取反
+    
+    def negate(self) -> Literal:
+        """返回取反的文字"""
+        return Literal(self.variable, not self.negated)
 
 class Clause:
     """表示一个子句（3个文字的析取）"""
     literals: List[Literal]
+    
+    def get_variables(self) -> Set[str]:
+        """获取子句中所有变量名"""
+        return {lit.variable for lit in self.literals}
 
 class Formula3SAT:
     """表示3SAT公式（多个子句的合取）"""
     clauses: List[Clause]
     variables: Set[str]  # 所有变量集合
+    
+    def get_clause_count(self) -> int:
+        """获取子句数量"""
+        return len(self.clauses)
 \end{lstlisting}
 
 \subsubsection{图的表示}
@@ -191,11 +203,92 @@ class Formula3SAT:
 # 人员A已实现，位于 src/models/graph.py
 class Graph:
     """表示无向图"""
-    def add_node(self, label: str) -> int  # 添加节点
-    def add_edge(self, u: int, v: int)     # 添加边
-    def nodes(self) -> List[int]           # 获取所有节点
-    def edges(self) -> List[Tuple[int, int]]  # 获取所有边
-    def get_label(self, node_id: int) -> str  # 获取节点标签
+    def add_node(self, label: str = "") -> int:
+        """添加节点，返回节点ID"""
+        
+    def add_edge(self, u: int, v: int) -> None:
+        """添加无向边"""
+        
+    def nodes(self) -> List[int]:
+        """获取所有节点ID"""
+        
+    def edges(self) -> List[Tuple[int, int]]:
+        """获取所有边"""
+        
+    def get_label(self, node_id: int) -> str:
+        """获取节点标签"""
+        
+    def is_vertex_cover(self, vertices: Set[int]) -> bool:
+        """检查是否是顶点覆盖"""
+        
+    def is_independent_set(self, vertices: Set[int]) -> bool:
+        """检查是否是独立集"""
+        
+    def to_networkx(self) -> nx.Graph:
+        """转换为networkx图对象"""
+\end{lstlisting}
+
+\subsubsection{解析器模块}
+
+% 已由人员A实现，详见 src/parsers/cnf_parser.py
+\begin{lstlisting}[language=Python]
+# 人员A已实现，位于 src/parsers/cnf_parser.py
+
+# txt文件解析器（本次作业规定格式）
+def parse_txt_file(file_path: str) -> Formula3SAT:
+    """
+    解析txt格式的3SAT公式文件
+    格式：每行3个文字，空格分隔，-x表示否定
+    """
+    
+# CNF字符串解析器（支持多种格式）
+def parse_cnf_string(s: str) -> Formula3SAT:
+    """
+    支持格式：
+    - 数学符号: "(x ∨ y ∨ ¬z) ∧ (¬x ∨ ¬y ∨ z)"
+    - 编程格式: "(x|y|~z)&(~x|~y|z)"
+    """
+    
+# DIMACS格式解析器
+def parse_dimacs(file_path: str) -> Formula3SAT:
+    """解析DIMACS CNF格式文件"""
+\end{lstlisting}
+
+\subsubsection{可视化模块}
+
+% 已由人员A实现，详见 src/utils/visualization.py
+\begin{lstlisting}[language=Python]
+# 人员A已实现，位于 src/utils/visualization.py
+
+def draw_reduction_graph_spec(formula_str, graph, k_or_n,
+                              problem_type, output_path):
+    """
+    按规格说明要求绘制归约结果图：
+    - 圆形节点，标签格式如 C2:¬x
+    - 不同线型区分子句边和矛盾边
+    - 包含问题文本描述
+    """
+
+def format_node_label(clause_index: int, literal_str: str) -> str:
+    """格式化节点标签，如 C1:x 或 C2:¬x"""
+\end{lstlisting}
+
+\subsubsection{主程序入口}
+
+% 已由人员A实现，详见 main.py
+\begin{lstlisting}[language=Python]
+# 人员A已实现，位于 main.py
+
+# 命令行使用示例：
+# python main.py --task 1 --input test/task1_course_example.txt
+# python main.py --task 2 --input test/task2_course_example.txt
+# python main.py --all  # 运行所有测试用例
+
+def run_task1(input_file: str, output_dir: str):
+    """运行任务1：3SAT到点覆盖的归约"""
+    
+def run_task2(input_file: str, output_dir: str):
+    """运行任务2：3SAT到独立集的归约"""
 \end{lstlisting}
 
 % ==================== 任务1代码：人员B填写 ====================

@@ -403,3 +403,221 @@ def draw_graph_with_highlight_on_axis(graph: Graph, highlight_nodes: Set[int],
     
     # 移除坐标轴
     ax.axis('off')
+
+
+def draw_reduction_graph_spec(formula_str: str,
+                               graph: Graph,
+                               k_or_n: int,
+                               problem_type: str,
+                               clause_edges: list = None,
+                               conflict_edges: list = None,
+                               output_path: Optional[str] = None,
+                               figsize: tuple = (12, 8)) -> None:
+    """
+    按照规格说明要求绘制归约结果图
+    
+    满足以下要求：
+    1. 完整图结构：展示全部节点和全部边
+    2. 圆形节点：节点绘制为圆形，标签包含子句编号和文字（如 C2:¬x）
+    3. 边清晰可见：使用不同线型区分子句内部边和互补文字之间的边
+    4. 问题文本描述：展示输入公式和所规约问题的文本
+    
+    Args:
+        formula_str: 原始3SAT公式字符串
+        graph: 归约后的图
+        k_or_n: 覆盖大小k或独立集大小n
+        problem_type: 问题类型，"Vertex Cover" 或 "Independent Set"
+        clause_edges: 子句内部边的列表（用于区分线型）
+        conflict_edges: 互补文字之间的边列表（用于区分线型）
+        output_path: 输出文件路径
+        figsize: 图形大小
+    """
+    try:
+        import networkx as nx
+        import matplotlib.pyplot as plt
+    except ImportError:
+        raise ImportError(
+            "需要安装networkx和matplotlib库:\n"
+            "pip install networkx matplotlib"
+        )
+    
+    # 转换为networkx图
+    G = graph.to_networkx()
+    
+    # 创建图形
+    fig, ax = plt.subplots(figsize=figsize)
+    
+    # 设置标题：显示原始公式
+    ax.set_title(f"输入公式: {formula_str}", fontsize=14, pad=20)
+    
+    # 计算布局：使用分层布局使子句节点分组显示
+    # 获取节点标签
+    labels = nx.get_node_attributes(G, 'label')
+    
+    # 按子句分组计算位置
+    pos = _calculate_clause_layout(G, labels)
+    
+    # 绘制子句内部边（实线，蓝色）
+    if clause_edges:
+        nx.draw_networkx_edges(
+            G, pos, edgelist=clause_edges, ax=ax,
+            edge_color='#3b82f6', width=1.6, style='solid',
+            alpha=0.8
+        )
+    
+    # 绘制互补文字边（虚线，红色）
+    if conflict_edges:
+        nx.draw_networkx_edges(
+            G, pos, edgelist=conflict_edges, ax=ax,
+            edge_color='#ef4444', width=1.2, style='dashed',
+            alpha=0.7
+        )
+    
+    # 如果没有区分边类型，绘制所有边
+    if not clause_edges and not conflict_edges:
+        nx.draw_networkx_edges(G, pos, ax=ax, edge_color='gray',
+                              width=1.5, alpha=0.7)
+    
+    # 绘制圆形节点
+    nx.draw_networkx_nodes(
+        G, pos, ax=ax,
+        node_shape='o',  # 圆形
+        node_size=1400,
+        node_color='#eef5ff',
+        edgecolors='#1f2937',
+        linewidths=1.2
+    )
+    
+    # 绘制节点标签
+    nx.draw_networkx_labels(G, pos, labels, ax=ax, font_size=10)
+    
+    # 移除坐标轴
+    ax.axis('off')
+    
+    # 添加问题文本描述（底部）
+    if problem_type == "Vertex Cover":
+        problem_text = f"点覆盖：在上图中是否存在大小不超过 k = {k_or_n} 的点覆盖？"
+    else:
+        problem_text = f"独立集：在上图中是否存在大小至少为 n = {k_or_n} 的独立集？"
+    
+    fig.text(
+        0.5, 0.04,
+        problem_text,
+        ha='center', va='bottom',
+        fontsize=11,
+        bbox=dict(boxstyle='round,pad=0.5', facecolor='#f0f0f0', alpha=0.8)
+    )
+    
+    # 调整布局
+    fig.subplots_adjust(bottom=0.12)
+    
+    # 保存或显示
+    if output_path:
+        dir_path = os.path.dirname(output_path)
+        if dir_path and not os.path.exists(dir_path):
+            os.makedirs(dir_path)
+        fig.savefig(output_path, dpi=180, bbox_inches='tight')
+        plt.close(fig)
+    else:
+        plt.show()
+
+
+def _calculate_clause_layout(G, labels: Dict[int, str]) -> Dict[int, tuple]:
+    """
+    计算按子句分组的节点布局
+    
+    使同一子句的节点聚集在一起，便于观察三角形结构。
+    
+    Args:
+        G: networkx图对象
+        labels: 节点标签字典
+        
+    Returns:
+        节点位置字典
+    """
+    import networkx as nx
+    import math
+    
+    # 从标签中提取子句编号
+    clause_groups = {}
+    for node_id, label in labels.items():
+        # 标签格式如 "C1:x" 或 "C2:¬x"
+        if ':' in label:
+            clause_num = label.split(':')[0]  # 如 "C1"
+            if clause_num not in clause_groups:
+                clause_groups[clause_num] = []
+            clause_groups[clause_num].append(node_id)
+        else:
+            # 如果标签没有子句编号，放入默认组
+            if 'default' not in clause_groups:
+                clause_groups['default'] = []
+            clause_groups['default'].append(node_id)
+    
+    # 计算每个子句组的位置
+    pos = {}
+    num_clauses = len(clause_groups)
+    
+    # 子句组排列成圆形或水平排列
+    if num_clauses <= 4:
+        # 水平排列
+        group_width = 3.0
+        total_width = num_clauses * group_width
+        start_x = -total_width / 2 + group_width / 2
+        
+        for i, (clause_name, nodes) in enumerate(clause_groups.items()):
+            group_center_x = start_x + i * group_width
+            group_center_y = 0
+            
+            # 子句内的3个节点排列成三角形
+            num_nodes = len(nodes)
+            if num_nodes == 3:
+                # 三角形布局
+                triangle_radius = 1.0
+                for j, node_id in enumerate(nodes):
+                    angle = j * 2 * math.pi / 3 - math.pi / 2  # 从顶部开始
+                    x = group_center_x + triangle_radius * math.cos(angle)
+                    y = group_center_y + triangle_radius * math.sin(angle)
+                    pos[node_id] = (x, y)
+            else:
+                # 其他数量的节点，均匀排列
+                for j, node_id in enumerate(nodes):
+                    x = group_center_x + (j - num_nodes/2) * 0.8
+                    y = group_center_y
+                    pos[node_id] = (x, y)
+    else:
+        # 多个子句时，使用圆形排列
+        radius = num_clauses * 0.8
+        for i, (clause_name, nodes) in enumerate(clause_groups.items()):
+            angle = i * 2 * math.pi / num_clauses
+            group_center_x = radius * math.cos(angle)
+            group_center_y = radius * math.sin(angle)
+            
+            # 子句内的节点排列成小三角形
+            num_nodes = len(nodes)
+            triangle_radius = 0.8
+            for j, node_id in enumerate(nodes):
+                node_angle = j * 2 * math.pi / 3 - math.pi / 2
+                x = group_center_x + triangle_radius * math.cos(node_angle)
+                y = group_center_y + triangle_radius * math.sin(node_angle)
+                pos[node_id] = (x, y)
+    
+    # 如果有默认组的节点，使用spring_layout
+    if 'default' in clause_groups:
+        remaining_pos = nx.spring_layout(G, pos=pos, fixed=pos.keys(), seed=42)
+        pos.update(remaining_pos)
+    
+    return pos
+
+
+def format_node_label(clause_index: int, literal_str: str) -> str:
+    """
+    格式化节点标签，符合规格说明要求
+    
+    Args:
+        clause_index: 子句编号（从1开始）
+        literal_str: 文字字符串，如 "x" 或 "¬x"
+        
+    Returns:
+        格式化的标签，如 "C1:x" 或 "C2:¬x"
+    """
+    return f"C{clause_index}:{literal_str}"

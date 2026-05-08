@@ -1,0 +1,6 @@
+x y -z 
+-x z w 
+y -w u 
+-y -u x 
+z w -u 
+-x -z u
