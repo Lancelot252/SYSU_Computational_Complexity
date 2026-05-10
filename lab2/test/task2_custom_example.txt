@@ -1,0 +1,6 @@
+a b -c 
+-a c d 
+b -d e 
+-b -e a 
+c d -e 
+-a -c e
