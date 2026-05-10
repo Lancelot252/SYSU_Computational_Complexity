@@ -111,32 +111,68 @@
 
 % ==================== 任务1：人员B填写 ====================
 \subsection{任务1：3SAT $\to$ 节点覆盖归约算法}
-% TODO: 人员B填写本节全部内容
+
+本算法将3SAT实例$\phi$在多项式时间内归约为一个图$G$和整数$k$，使得$\phi$可满足当且仅当$G$存在一个大小不超过$k$的节点覆盖。
 
 \subsubsection{归约思路}
 
-% TODO: 人员B - 详细描述归约思路，参考课件pnp3.ppt
-将3SAT实例$\phi$转换为图$G$和整数$k$，使得$\phi$可满足当且仅当$G$存在大小不超过$k$的节点覆盖。
+给定一个3SAT公式$\phi = C_1 \land C_2 \land \cdots \land C_m$，其中每个子句$C_i = (l_{i1} \lor l_{i2} \lor l_{i3})$包含恰好三个文字。
+
+\textbf{核心思想}：将每个子句的三种可能满足方式映射为图中的三角形结构，并通过冲突边确保变量赋值的一致性。每个三角形必须覆盖其中两条边才能用最少的节点，这恰好要求我们从三个文字中选择两个``假''文字，留下一个``真''文字来满足子句。冲突边则保证一个变量及其否定不能同时为真。
 
 \subsubsection{构造方法}
 
-% TODO: 人员B - 描述图的构造方法，包括变量构件、子句构件、连接方式
-\textbf{步骤1：变量构件}
+设3SAT实例$\phi$包含$m$个子句和$n$个变量。
 
-对于每个变量$x_i$，构造一个变量构件（两个顶点相连的边）。
+\textbf{步骤1：子句构件（三角形）}
 
-\textbf{步骤2：子句构件}
+对于每个子句$C_i = (l_{i1} \lor l_{i2} \lor l_{i3})$，在图中创建三个顶点，分别标记为$C_i{:}l_{i1}$、$C_i{:}l_{i2}$、$C_i{:}l_{i3}$，并在它们之间两两连边形成三角形。该三角形保证任意顶点覆盖必须至少选取其中两个顶点。
 
-对于每个子句$C_j$，构造一个子句构件（三个顶点组成的三角形）。
+\textbf{步骤2：冲突边}
 
-\textbf{步骤3：连接构件}
+对于任意两个分别位于不同子句的顶点，如果它们对应的文字互为否定（即一个为$x$，另一个为$\neg x$），则在它们之间添加一条冲突边。冲突边确保了变量赋值的一致性：一个变量及其否定不能同时为真。
 
-将子句构件中的顶点与变量构件中的顶点相连。
+\textbf{步骤3：参数设置}
+
+设定覆盖大小$k = 2m$（$m$为子句数量）。因为每个三角形至少需要2个顶点来覆盖其三条边，所以$k = 2m$是最小可能的节点覆盖大小。
+
+\textbf{构造规模}：图$G$包含$|V| = 3m$个顶点，$|E| = 3m + e_c$条边（其中$e_c$为冲突边数量，至多为$O(m^2)$）。整个构造可在多项式时间内完成。
 
 \subsubsection{正确性证明}
 
-% TODO: 人员B - 证明归约的正确性，需证明双向蕴含
-证明：$\phi$可满足 $\Leftrightarrow$ $G$存在大小为$k$的节点覆盖。
+\textbf{定理}：3SAT公式$\phi$可满足 $\Leftrightarrow$ 归约得到的图$G$存在大小不超过$k = 2m$的节点覆盖。
+
+\textbf{证明（$\Rightarrow$方向）}：
+
+假设$\phi$存在一个满足赋值$\tau$。按如下方式构造节点覆盖$S$：
+\begin{enumerate}
+    \item 对于每个子句$C_i$，赋值$\tau$使得子句中至少一个文字为真。在该子句对应的三角形中，选取\textbf{不为真}的两条文字对应的顶点加入$S$。
+    \item 每个三角形恰好选取2个顶点，因此$|S| = 2m = k$。
+\end{enumerate}
+
+验证$S$是有效的节点覆盖：
+\begin{itemize}
+    \item 对于三角形边：每个三角形的三条边中，选取的2个顶点覆盖了所有三条边（每条边至少有一个被选端点）。
+    \item 对于冲突边：设冲突边连接顶点$v(x)$和$v(\neg x)$。在赋值$\tau$下，$x$和$\neg x$不能同时为真，因此至少有一个文字为假，其对应顶点被选入$S$。故冲突边被覆盖。
+\end{itemize}
+
+\textbf{证明（$\Leftarrow$方向）}：
+
+假设图$G$存在一个大小不超过$k = 2m$的节点覆盖$S$。
+
+\begin{enumerate}
+    \item 每个三角形至少需要2个顶点来覆盖其三条边。图中共有$m$个互不相交的三角形（冲突边跨三角形连接，但三角形内部边仅由该三角形顶点覆盖）。因此$|S| \geq 2m$，结合$|S| \leq k = 2m$，得$|S| = 2m$，且每个三角形\textbf{恰好}有2个顶点在$S$中。
+    \item 对于每个三角形，未被$S$选取的唯一顶点对应的文字被设定为``真''。据此定义变量赋值$\tau$：
+    \begin{itemize}
+        \item 若存在未被选取的顶点标记为文字$x$，则设$\tau(x) = \text{True}$。
+        \item 若存在未被选取的顶点标记为文字$\neg x$，则设$\tau(x) = \text{False}$。
+        \item 若变量$x$相关的所有顶点均被选取，则任意设定$\tau(x)$。
+    \end{itemize}
+    \item \textbf{赋值一致性}：假设矛盾，即存在顶点$v(x)$和$v(\neg x)$都未被$S$选取。由于它们之间的冲突边未被覆盖（两个端点都不在$S$中），与$S$为节点覆盖矛盾。因此赋值$\tau$的定义是良定义的。
+    \item \textbf{公式可满足}：每个子句三角形中恰有一个顶点不在$S$中，该顶点对应的文字在该子句中为真，因此每个子句均被满足。故$\phi$在$\tau$下为真。
+\end{enumerate}
+
+综上，归约正确性得证。该归约的时间复杂度为$O(m^2)$（主要来自冲突边的添加），属于多项式时间归约。
 
 % ==================== 任务2：人员C填写 ====================
 \subsection{任务2：3SAT $\to$ 独立集归约算法}
@@ -293,45 +329,79 @@ def run_task2(input_file: str, output_dir: str):
 
 % ==================== 任务1代码：人员B填写 ====================
 \subsection{任务1关键代码说明}
-% TODO: 人员B填写本节内容
 
 \subsubsection{归约函数}
 
-% TODO: 人员B - 实现并展示归约函数的关键代码
+归约函数 \texttt{reduce\_3sat\_to\_vertex\_cover} 实现了3SAT到节点覆盖的多项式时间归约。核心流程为：遍历每个子句创建三角形顶点，然后为所有互补文字对添加冲突边。
+
 \begin{lstlisting}[language=Python]
-# 人员B需实现，位于 src/reductions/vertex_cover.py
+# 位于 src/reductions/vertex_cover.py
 def reduce_3sat_to_vertex_cover(formula: Formula3SAT) -> Tuple[Graph, int]:
-    """
-    将3SAT实例归约为节点覆盖实例
-    
-    Args:
-        formula: 3SAT公式
-        
-    Returns:
-        (G, k): 图G和整数k，使得公式可满足 ⟺ G有大小为k的节点覆盖
-    """
-    # TODO: 人员B实现归约算法
-    pass
+    graph = Graph()
+    m = formula.get_clause_count()
+    k = 2 * m  # 从每个三角形的2个顶点构成覆盖
+
+    # 记录每种文字对应的节点ID列表
+    literal_nodes = {}
+
+    for i, clause in enumerate(formula):
+        for j, literal in enumerate(clause):
+            label = format_node_label(i + 1, str(literal))
+            graph.add_node(label)
+            key = (literal.variable, literal.negated)
+            if key not in literal_nodes:
+                literal_nodes[key] = []
+            literal_nodes[key].append(i * 3 + j)
+
+        # 创建子句三角形边
+        base = i * 3
+        graph.add_edge(base, base + 1)
+        graph.add_edge(base + 1, base + 2)
+        graph.add_edge(base, base + 2)
+
+    # 为同变量的正负文字节点添加冲突边
+    for var in formula.get_variables():
+        pos_nodes = literal_nodes.get((var, False), [])
+        neg_nodes = literal_nodes.get((var, True), [])
+        for pos_node in pos_nodes:
+            for neg_node in neg_nodes:
+                if not graph.has_edge(pos_node, neg_node):
+                    graph.add_edge(pos_node, neg_node)
+
+    return graph, k
 \end{lstlisting}
 
 \subsubsection{解的转换}
 
-% TODO: 人员B - 实现从节点覆盖提取变量赋值的代码
+从节点覆盖解提取满足赋值的函数 \texttt{extract\_satisfying\_assignment} 基于以下原理：在大小为$k = 2m$的节点覆盖中，每个子句三角形恰好有2个顶点被选取，未被选取的那个顶点对应一个在该子句中为真的文字。
+
 \begin{lstlisting}[language=Python]
-# TODO: 人员B实现
-def extract_assignment_from_cover(cover: Set[int], formula: Formula3SAT) -> Dict[str, bool]:
-    """
-    从节点覆盖提取变量赋值
-    
-    Args:
-        cover: 节点覆盖集合
-        formula: 原始3SAT公式
-        
-    Returns:
-        变量赋值字典 {变量名: True/False}
-    """
-    pass
+# 位于 src/reductions/vertex_cover.py
+def extract_satisfying_assignment(formula, graph, vertex_cover):
+    assignment = {}
+    m = formula.get_clause_count()
+
+    for i, clause in enumerate(formula):
+        for j, literal in enumerate(clause):
+            node_id = i * 3 + j
+            if node_id not in vertex_cover:
+                # 此顶点未被覆盖 → 对应文字取值为真
+                if literal.negated:
+                    assignment[literal.variable] = False
+                else:
+                    assignment[literal.variable] = True
+
+    # 对未赋值的变量默认为True（取值不影响公式可满足性）
+    for var in formula.get_variables():
+        if var not in assignment:
+            assignment[var] = True
+
+    return assignment
 \end{lstlisting}
+
+\subsubsection{验证函数}
+
+此外提供了验证函数 \texttt{verify\_vertex\_cover\_reduction}，用于检查归约后图的结构是否正确，包括：节点数是否为$3m$、$k$是否等于$2m$、每个子句的三角形边是否完整、互补文字对之间是否存在冲突边。
 
 % ==================== 任务2代码：人员C填写 ====================
 \subsection{任务2关键代码说明}
@@ -397,25 +467,28 @@ def extract_assignment_from_indset(indset: Set[int], formula: Formula3SAT) -> Di
 
 \subsubsection{任务1测试（人员B填写）}
 
-% TODO: 人员B - 添加任务1的课件例子测试结果
-\textbf{输入}：3SAT公式$\phi_1 = (x \lor y \lor \neg z) \land (\neg x \lor \neg y \lor z) \land (\neg x \lor y \lor \neg z)$
+\textbf{输入}：3SAT公式$\phi_1 = (x \lor y \lor z) \land (\neg x \lor \neg y \lor \neg z) \land (x \lor \neg y \lor z) \land (\neg x \lor y \lor \neg z)$
+
+该公式包含$m = 4$个子句，$n = 3$个变量（$x, y, z$）。公式是可满足的，例如赋值$\{x = \text{True}, y = \text{True}, z = \text{False}\}$即为一组满足赋值。
 
 \textbf{归约结果}：
 \begin{itemize}
-    \item 图$G_1$：顶点数$|V| = $ TODO: 人员B填写，边数$|E| = $ TODO: 人员B填写
-    \item 参数$k = $ TODO: 人员B填写
+    \item 图$G_1$：顶点数$|V| = 3m = 12$，边数$|E| = 24$（其中12条为三角形边，12条为冲突边）
+    \item 参数$k = 2m = 8$
 \end{itemize}
 
-% TODO: 人员B - 添加归约结果图示
-% \begin{figure}[H]
-%     \centering
-%     \includegraphics[width=0.8\textwidth]{figs/task1_course_example.png}
-%     \caption{任务1课件例子归约结果}
-%     \label{fig:task1_course_example}
-% \end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../output/task1_course_example_vertex_cover.png}
+    \caption{任务1课件例子归约结果图（3SAT $\to$ Vertex Cover，$m=4$）}
+    \label{fig:task1_course_example}
+\end{figure}
+
+\textbf{结构分析}：
+图包含4个三角形，分别对应4个子句。冲突边连接互补文字节点，如$C_1{:}x$与$C_2{:}\neg x$、$C_4{:}\neg x$之间的边，$C_1{:}y$与$C_2{:}\neg y$、$C_3{:}\neg y$之间的边等。
 
 \textbf{验证结果}：
-% TODO: 人员B - 添加验证结果，说明归约的正确性
+调用\texttt{verify\_vertex\_cover\_reduction}函数验证归约结构正确性，检查项包括：节点数$12 = 3 \times 4$、$k = 8 = 2 \times 4$、4个子句的三角形结构完整、所有互补文字对之间存在冲突边。验证通过，归约结构正确。
 
 \subsubsection{任务2测试（人员C填写）}
 
@@ -447,14 +520,25 @@ def extract_assignment_from_indset(indset: Set[int], formula: Formula3SAT) -> Di
 
 \subsubsection{任务1测试（人员B填写）}
 
-% TODO: 人员B - 添加任务1的自定义例子测试结果
-\textbf{输入}：3SAT公式$\phi_2 = $ 6个子句的自定义公式
+\textbf{输入}：3SAT公式$\phi_2 = (x \lor y \lor \neg z) \land (\neg x \lor z \lor w) \land (y \lor \neg w \lor u) \land (\neg y \lor \neg u \lor x) \land (z \lor w \lor \neg u) \land (\neg x \lor \neg z \lor u)$
+
+该公式包含$m = 6$个子句，$n = 5$个变量（$x, y, z, w, u$）。该公式是可满足的。
 
 \textbf{归约结果}：
-% TODO: 人员B填写
+\begin{itemize}
+    \item 图$G_2$：顶点数$|V| = 3m = 18$，边数$|E| = 34$（其中18条为三角形边，16条为冲突边）
+    \item 参数$k = 2m = 12$
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../output/task1_custom_example_vertex_cover.png}
+    \caption{任务1自定义例子归约结果图（3SAT $\to$ Vertex Cover，$m=6$）}
+    \label{fig:task1_custom_example}
+\end{figure}
 
 \textbf{验证结果}：
-% TODO: 人员B填写
+调用\texttt{verify\_vertex\_cover\_reduction}函数验证，节点数$18 = 3 \times 6$、$k = 12 = 2 \times 6$、6个子句的三角形结构完整、所有互补文字对间的冲突边存在。验证通过，归约结构正确。
 
 \subsubsection{任务2测试（人员C填写）}
 
@@ -470,12 +554,54 @@ def extract_assignment_from_indset(indset: Set[int], formula: Formula3SAT) -> Di
 % ==================== 结果分析：人员B和C共同填写 ====================
 \subsection{结果分析}
 
-% TODO: 人员B和C - 分析测试结果
+\subsubsection{归约的正确性验证}
+
+归约的正确性通过以下三个层面进行验证：
+
+\begin{enumerate}
+    \item \textbf{结构验证}：\texttt{verify\_vertex\_cover\_reduction}函数自动检查归约后图的结构是否满足规约定义——节点数$|V| = 3m$、$k = 2m$、每个子句对应一个完整的三角形、所有互补文字对之间存在冲突边。两个测试用例均通过结构验证。
+
+    \item \textbf{理论保证}：归约的正确性在算法设计部分（第3.1节）已给出严格的双向蕴含证明，确保了$\phi$可满足当且仅当$G$存在大小为$k$的节点覆盖。
+
+    \item \textbf{解的可提取性}：\texttt{extract\_satisfying\_assignment}函数能够从任意大小为$k$的节点覆盖中正确提取出满足赋值，该赋值可通过代入原公式进行验证。
+\end{enumerate}
+
+\subsubsection{时间复杂度分析}
+
+任务1（3SAT到Vertex Cover）归约的时间复杂度分析如下：
+
+设$m$为子句数，$n$为变量数。
+
 \begin{itemize}
-    \item 归约的正确性验证：TODO: 说明如何验证归约的正确性
-    \item 时间复杂度分析：TODO: 分析归约算法的时间复杂度
-    \item 空间复杂度分析：TODO: 分析归约算法的空间复杂度
+    \item 创建三角形顶点和边：$O(m)$——遍历每个子句的3个文字，每个子句添加3条边。
+    \item 添加冲突边：$O(m^2)$——在最坏情况下，一个变量的正负文字可能出现在$O(m)$个不同子句中，连接它们产生$O(m^2)$条冲突边的开销。
+    \item 总时间复杂度：$O(m^2)$，属于多项式时间归约。
 \end{itemize}
+
+\subsubsection{空间复杂度分析}
+
+\begin{itemize}
+    \item 图存储：$O(|V| + |E|) = O(m + m^2) = O(m^2)$——邻接表和边集合存储所有顶点和边。
+    \item 辅助数据结构：$O(m)$——文字到节点ID的映射。
+    \item 总空间复杂度：$O(m^2)$。
+\end{itemize}
+
+\subsubsection{测试结果汇总}
+
+\begin{table}[H]
+    \centering
+    \caption{任务1归约测试结果}
+    \begin{tabular}{c|c|c|c|c}
+        \hline
+        测试用例 & 子句数$m$ & $|V|$ & $|E|$ & $k$ \\
+        \hline
+        教材示例 & 4 & 12 & 24 & 8 \\
+        自定义示例 & 6 & 18 & 34 & 12 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+测试结果与理论预期完全一致：$|V| = 3m$，$k = 2m$。边数等于三角形边（$3m$）加上冲突边数量（取决于变量在不同子句中的出现次数）。
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -489,7 +615,7 @@ def extract_assignment_from_indset(indset: Set[int], formula: Formula3SAT) -> Di
 
 \begin{enumerate}
     \item \textbf{公共模块}（人员A）：实现了CNF公式的解析和表示、图数据结构的设计
-    \item \textbf{任务1}（人员B）：实现了3SAT到Vertex Cover的归约 % TODO: 人员B补充具体成果
+    \item \textbf{任务1}（人员B）：完整实现了3SAT到Vertex Cover的多项式时间归约算法，包括归约函数\texttt{reduce\_3sat\_to\_vertex\_cover}、验证函数\texttt{verify\_vertex\_cover\_reduction}和解提取函数\texttt{extract\_satisfying\_assignment}。通过三角形子句构件和冲突边的构造，正确实现了$\phi$可满足$\Leftrightarrow$$G$存在大小为$2m$的节点覆盖的归约目标。所有单元测试和示例测试均通过验证。
     \item \textbf{任务2}（人员C）：实现了3SAT到Independent Set的归约 % TODO: 人员C补充具体成果
     \item 验证了归约的正确性
 \end{enumerate}
@@ -497,16 +623,15 @@ def extract_assignment_from_indset(indset: Set[int], formula: Formula3SAT) -> Di
 % ==================== 遇到的问题：人员B和C分别填写各自遇到的问题 ====================
 \subsection{遇到的问题和解决方案}
 
-% TODO: 人员B填写任务1遇到的问题
 \textbf{任务1（人员B）}：
 \begin{itemize}
-    \item 问题1：TODO: 人员B填写遇到的问题
+    \item 问题1：理解3SAT到Vertex Cover归约中$k$值的设定——初始化模板中描述了变量构件+子句构件的构造方式（$k = n + 2m$），但最终实现选择了仅使用子句三角形+冲突边的简化方案（$k = 2m$），需要确认两种方案的等价性和正确性。
     \begin{itemize}
-        \item 解决方案：TODO: 人员B填写解决方案
+        \item 解决方案：查阅Sipser教材和课程课件，确认两种构造方式均为有效的多项式时间归约。简化方案（$k = 2m$）避免了变量构件的引入，减少了图的顶点数（从$2n + 3m$降至$3m$），同时保持了归约的正确性——三角形结构保证每个子句恰好选出2个顶点，冲突边保证变量赋值的一致性。
     \end{itemize}
-    \item 问题2：TODO: 人员B填写遇到的问题
+    \item 问题2：从节点覆盖中提取满足赋值时，需要正确处理变量未被任何三角形顶点``选中为真''的情况——当某个变量的所有正负文字对应顶点都在节点覆盖中时，该变量未被任何已确定赋值的文字引用。
     \begin{itemize}
-        \item 解决方案：TODO: 人员B填写解决方案
+        \item 解决方案：对于这种情况，可以任意赋值（如默认为True），因为这不会影响公式的可满足性——该变量的任何赋值都已经与其他子句的满足状态无关。在实现中，对未被赋值的变量统一默认为True。
     \end{itemize}
 \end{itemize}
 
@@ -529,8 +654,7 @@ def extract_assignment_from_indset(indset: Set[int], formula: Formula3SAT) -> Di
 % TODO: 人员A填写心得体会
 \textbf{人员A}：通过本次实验，我深入理解了NP完全性理论中多项式时间归约的概念，掌握了如何设计公共数据结构为团队协作提供便利。...
 
-% TODO: 人员B填写心得体会
-\textbf{人员B}：TODO: 人员B填写心得体会，关于3SAT到节点覆盖归约的理解...
+\textbf{人员B}：通过本次实验，我深入理解了NP完全性理论中多项式时间归约的核心思想。3SAT到Vertex Cover的归约是一个经典且精巧的构造：它利用图的结构约束（每个三角形至少需要2个顶点覆盖）来模拟逻辑约束（每个子句至少需要1个文字为真），并通过冲突边来保证布尔赋值的一致性。在实现过程中，我体会到归约算法设计中``正确性证明''的重要性——归约不仅是数据的转换，更是问题结构的映射，必须严格证明双向蕴含关系才能确保归约的有效性。此外，本次实验也锻炼了我在现有代码框架上协同开发的能力，通过清晰的接口定义和文档规范，有效提升了团队协作效率。
 
 % TODO: 人员C填写心得体会
 \textbf{人员C}：TODO: 人员C填写心得体会，关于3SAT到独立集归约的理解...
