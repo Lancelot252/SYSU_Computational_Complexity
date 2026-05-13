@@ -229,6 +229,17 @@ python tests/test_cases.py
 1. 如果 φ 可满足，取每个子句中为真的文字节点，构成大小为 n 的独立集
 2. 如果 G 存在大小为 n 的独立集，独立集中的节点给出满足赋值
 
+**运行测试**:
+```bash
+# 运行independent_set测试文件
+python tests/test_independent_set.py
+```
+测试用例保存于：
+`test\task2_course_example.txt`与`test\task2_custom_example.txt`中
+
+图片输出保存于：
+`output\independent_set_course_example.png`与`output\independent_set_custom_example.png`中
+
 ## 测试用例
 
 ### 任务1测试用例
@@ -243,7 +254,7 @@ python tests/test_cases.py
 | 文件名 | 公式 | 子句数 | 变量数 |
 |--------|------|--------|--------|
 | task2_course_example.txt | (x ∨ y ∨ ¬z) ∧ (¬x ∨ ¬y ∨ z) ∧ (¬x ∨ y ∨ ¬z) | 3 | 3 |
-| task2_custom_example.txt | (a ∨ b ∨ ¬c) ∧ (¬a ∨ c ∨ d) ∧ ... | 6 | 5 |
+| task2_custom_example.txt |(x∨¬y∨z)∧(¬x∨y∨¬z)∧(y∨¬z∨w)∧(¬y∨z∨¬w)∧(x∨¬w∨¬z)| 5 | 5 |
 
 ## 输出图片规范
 

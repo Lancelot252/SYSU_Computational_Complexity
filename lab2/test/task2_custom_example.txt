@@ -1,6 +1,5 @@
-a b -c 
--a c d 
-b -d e 
--b -e a 
-c d -e 
--a -c e
+x -y z
+-x y -z
+y -z w
+-y z -w
+x -w -z

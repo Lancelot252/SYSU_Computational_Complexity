@@ -85,7 +85,7 @@ def run_task1(input_file: str, output_dir: str = "output") -> None:
         print(f"\n问题：在上图中是否存在大小不超过 k = {k} 的点覆盖？")
         
     except NotImplementedError:
-        print(f"⚠️  归约函数尚未实现！")
+        print(f"  归约函数尚未实现！")
         print(f"   请在 src/reductions/vertex_cover.py 中实现 reduce_3sat_to_vertex_cover 函数")
         print(f"\n   当前已完成的准备工作：")
         print(f"   - 输入文件解析成功")
@@ -146,7 +146,7 @@ def run_task2(input_file: str, output_dir: str = "output") -> None:
         print(f"\n问题：在上图中是否存在大小至少为 n = {n} 的独立集？")
         
     except NotImplementedError:
-        print(f"⚠️  归约函数尚未实现！")
+        print(f" 归约函数尚未实现！")
         print(f"   请在 src/reductions/independent_set.py 中实现 reduce_3sat_to_independent_set 函数")
         print(f"\n   当前已完成的准备工作：")
         print(f"   - 输入文件解析成功")
@@ -186,7 +186,7 @@ def run_all_tests(output_dir: str = "output") -> None:
         if os.path.exists(filepath):
             run_task1(filepath, output_dir)
         else:
-            print(f"  ⚠️  文件不存在: {filepath}")
+            print(f"   文件不存在: {filepath}")
     
     print(f"\n任务2测试用例：")
     for filename in task2_files:
@@ -194,7 +194,7 @@ def run_all_tests(output_dir: str = "output") -> None:
         if os.path.exists(filepath):
             run_task2(filepath, output_dir)
         else:
-            print(f"  ⚠️  文件不存在: {filepath}")
+            print(f"   文件不存在: {filepath}")
 
 
 def main():

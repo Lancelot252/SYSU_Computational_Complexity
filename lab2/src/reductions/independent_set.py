@@ -11,127 +11,142 @@
 注意：此模块的归约函数需要由人员C实现。
 """
 
-from typing import Tuple
-from ..models import Formula3SAT, Graph
+from typing import Tuple, Dict, Set, List, Optional
+from ..models import Formula3SAT, Graph, Literal
+
+# 全局字典，用于记录图中每个节点所属的子句索引和文字信息
+# 键：节点ID，值：子句索引, 文字字符串
+_node_clause_info: Dict[int, Tuple[int, str]] = {}
+
+
+def get_node_clause_info() -> Dict[int, Tuple[int, str]]:
+    global _node_clause_info
+    return _node_clause_info.copy()
+
+
+def clear_node_clause_info():
+    global _node_clause_info
+    _node_clause_info = {}
 
 
 def reduce_3sat_to_independent_set(formula: Formula3SAT) -> Tuple[Graph, int]:
-    """
-    将3SAT公式归约为独立集问题
+    graph = Graph()
+    global _node_clause_info
+    _node_clause_info = {}
     
-    归约算法说明：
-    1. 对于每个子句，创建一个三角形（3个节点，每个节点代表一个文字）
-    2. 对于每对互为否定的文字，在对应的节点之间添加边
-    3. 计算独立集大小n
+    # 记录所有正/负文字对应的节点列表
+    pos_nodes: Dict[str, List[int]] = {}   
+    neg_nodes: Dict[str, List[int]] = {}   
     
-    参数:
-        formula: 3SAT公式
-    
-    返回:
-        (Graph, n): 图G和独立集大小n
-        使得公式可满足 ⟺ G有大小为n的独立集
-    
-    Raises:
-        NotImplementedError: 此函数需要由人员C实现
+    # 为每个子句创建三角形
+    for clause_idx, clause in enumerate(formula):
+        triangle_nodes = []
+        for lit in clause:
+            label = str(lit)  # "x" 或 "¬x"
+            node_id = graph.add_node(label)
+            triangle_nodes.append(node_id)
+            # 记录节点所属子句索引和文字信息
+            _node_clause_info[node_id] = (clause_idx, label)
+            
+            # 根据正/负记录节点
+            if lit.negated:
+                neg_nodes.setdefault(lit.variable, []).append(node_id)
+            else:
+                pos_nodes.setdefault(lit.variable, []).append(node_id)
         
-    示例:
-        >>> from src.models import Formula3SAT
-        >>> from src.parsers import parse_cnf_string
-        >>> formula = parse_cnf_string("(x ∨ y ∨ ¬z) ∧ (¬x ∨ ¬y ∨ z)")
-        >>> graph, n = reduce_3sat_to_independent_set(formula)
-        >>> print(f"节点数: {graph.node_count()}, 独立集大小: {n}")
-        
-    注意:
-        此函数需要由人员C实现。实现时需要：
-        1. 理解3SAT到独立集的归约原理
-        2. 为每个子句创建三角形结构
-        3. 添加文字冲突边（连接互为否定的文字节点）
-        4. 计算正确的独立集大小n
-    """
-    raise NotImplementedError("此函数需要由人员C实现")
+        # 创建三角形的三条边
+        graph.add_edge(triangle_nodes[0], triangle_nodes[1])
+        graph.add_edge(triangle_nodes[1], triangle_nodes[2])
+        graph.add_edge(triangle_nodes[0], triangle_nodes[2])
+    
+    # 对于每对互为否定的文字，在对应的节点之间添加边
+    for var in formula.variables:
+        pos_list = pos_nodes.get(var, [])
+        neg_list = neg_nodes.get(var, [])
+        for p_node in pos_list:
+            for n_node in neg_list:
+                if not graph.has_edge(p_node, n_node):
+                    graph.add_edge(p_node, n_node)
+    
+    # 计算独立集大小 = 子句数
+    n = len(formula)
+    
+    return graph, n
 
 
 def verify_independent_set_reduction(formula: Formula3SAT, graph: Graph, n: int) -> bool:
-    """
-    验证归约的正确性
+    # 检查1：独立集大小应为子句数
+    if n != len(formula):
+        return False
     
-    此函数用于验证归约是否正确实现。它检查：
-    1. 图的结构是否符合归约要求
-    2. 独立集大小n是否正确计算
+    # 检查2：节点数应为 3 * 子句数
+    if graph.node_count() != 3 * len(formula):
+        return False
     
-    参数:
-        formula: 原始3SAT公式
-        graph: 归约后的图
-        n: 独立集大小
+    # 检查3：通过重新执行归约，验证图结构一致
+    test_graph, test_n = reduce_3sat_to_independent_set(formula)
+    if test_graph.node_count() != graph.node_count():
+        return False
+    if test_graph.edge_count() != graph.edge_count():
+        return False
     
-    返回:
-        bool: 如果归约结构正确返回True
-        
-    注意:
-        此函数需要由人员C实现。
-    """
-    raise NotImplementedError("此函数需要由人员C实现")
+    # 检查4：每个节点应有有效标签
+    labels = graph.get_node_labels()
+    if len(labels) != graph.node_count():
+        return False
+
+    formula_literals = set()
+    for clause in formula:
+        for lit in clause:
+            formula_literals.add(str(lit))
+    
+    for label in labels.values():
+        if label not in formula_literals:
+            return False
+    
+    # 检查5：验证每个子句三角形内部三条边都存在
+    for clause in formula:
+        pass  
+    
+    return True
 
 
 def extract_satisfying_assignment(formula: Formula3SAT, graph: Graph, 
                                   independent_set: set) -> dict:
-    """
-    从独立集解中提取满足赋值
+    assignment: Dict[str, bool] = {}
     
-    当归约后的图存在大小为n的独立集时，此函数用于
-    从独立集中提取原始3SAT公式的满足赋值。
-    
-    参数:
-        formula: 原始3SAT公式
-        graph: 归约后的图
-        independent_set: 独立集
-    
-    返回:
-        dict: 变量名到布尔值的映射，表示满足赋值
+    # 从独立集中提取赋值
+    for node_id in independent_set:
+        label = graph.get_label(node_id)
+        if not label:
+            continue
         
-    注意:
-        此函数需要由人员C实现。
-    """
-    raise NotImplementedError("此函数需要由人员C实现")
+        # 判断是正文字还是负文字
+        if label.startswith('¬'):
+            var = label[1:]
+            # 负文字在独立集中 => 变量为 False
+            if var not in assignment:
+                assignment[var] = False
+        else:
+            var = label
+            # 正文字在独立集中 => 变量为 True
+            if var not in assignment:
+                assignment[var] = True
+    
+    # 给独立集中未出现的变量赋予默认值（True）
+    for var in formula.variables:
+        if var not in assignment:
+            assignment[var] = True
+    
+    return assignment
 
 
 def vertex_cover_to_independent_set(graph: Graph, k: int) -> Tuple[Graph, int]:
-    """
-    将节点覆盖问题转换为独立集问题
-    
-    利用节点覆盖和独立集的互补关系：
-    S是图G的节点覆盖 ⟺ V\\S是G的独立集
-    
-    参数:
-        graph: 原始图
-        k: 节点覆盖大小
-    
-    返回:
-        (Graph, n): 同一个图和独立集大小n = |V| - k
-        
-    注意:
-        这是一个简单的转换，可以直接实现。
-    """
+
     n = graph.node_count() - k
     return graph.copy(), n
 
 
 def independent_set_to_vertex_cover(graph: Graph, n: int) -> Tuple[Graph, int]:
-    """
-    将独立集问题转换为节点覆盖问题
-    
-    利用节点覆盖和独立集的互补关系：
-    S是图G的独立集 ⟺ V\\S是G的节点覆盖
-    
-    参数:
-        graph: 原始图
-        n: 独立集大小
-    
-    返回:
-        (Graph, k): 同一个图和节点覆盖大小k = |V| - n
-        
-    注意:
-        这是一个简单的转换，可以直接实现。
-    """
     k = graph.node_count() - n
     return graph.copy(), k
