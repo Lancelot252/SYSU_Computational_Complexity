@@ -603,12 +603,12 @@ def extract_satisfying_assignment(formula: Formula3SAT, graph: Graph,
     \item 参数$k = 2m = 8$
 \end{itemize}
 
-% \begin{figure}[H]
-%     \centering
-%     \includegraphics[width=0.8\textwidth]{../output/task1_course_example_vertex_cover.png}
-%     \caption{任务1课件例子归约结果图（3SAT $\to$ Vertex Cover，$m=4$）}
-%     \label{fig:task1_course_example}
-% \end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../output/task1_course_example_vertex_cover.png}
+    \caption{任务1课件例子归约结果图（3SAT $\to$ Vertex Cover，$m=4$）}
+    \label{fig:task1_course_example}
+\end{figure}
 
 \textbf{结构分析}：
 图包含4个三角形，分别对应4个子句。冲突边连接互补文字节点，如$C_1{:}x$与$C_2{:}\neg x$、$C_4{:}\neg x$之间的边，$C_1{:}y$与$C_2{:}\neg y$、$C_3{:}\neg y$之间的边等。
@@ -655,12 +655,12 @@ def extract_satisfying_assignment(formula: Formula3SAT, graph: Graph,
     \item 参数$k = 2m = 12$
 \end{itemize}
 
-% \begin{figure}[H]
-%     \centering
-%     \includegraphics[width=0.8\textwidth]{../output/task1_custom_example_vertex_cover.png}
-%     \caption{任务1自定义例子归约结果图（3SAT $\to$ Vertex Cover，$m=6$）}
-%     \label{fig:task1_custom_example}
-% \end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../output/task1_custom_example_vertex_cover.png}
+    \caption{任务1自定义例子归约结果图（3SAT $\to$ Vertex Cover，$m=6$）}
+    \label{fig:task1_custom_example}
+\end{figure}
 
 \textbf{验证结果}：
 调用\texttt{verify\_vertex\_cover\_reduction}函数验证，节点数$18 = 3 \times 6$、$k = 12 = 2 \times 6$、6个子句的三角形结构完整、所有互补文字对间的冲突边存在。验证通过，归约结构正确。
@@ -823,8 +823,8 @@ def extract_satisfying_assignment(formula: Formula3SAT, graph: Graph,
 % ==================== 心得体会：三人各自填写 ====================
 \subsection{心得体会}
 
-% TODO: 人员A填写心得体会
-\textbf{人员A}：通过本次实验，我深入理解了NP完全性理论中多项式时间归约的概念，掌握了如何设计公共数据结构为团队协作提供便利。...
+%人员A填写心得体会
+\textbf{人员A}：通过本次实验，我深入理解了NP完全性理论中多项式时间归约的基础框架设计的重要性。作为公共模块的实现者，我负责设计了CNF公式解析器、图数据结构以及可视化工具，这些基础设施为后续的归约算法实现提供了关键支撑。在设计\texttt{Formula3SAT}类时，我采用了迭代器模式使其能够像列表一样遍历子句，同时提供了变量集合、子句计数等便捷方法；在\texttt{Graph}类设计中，我使用邻接表存储边关系，并实现了与NetworkX的无缝转换，便于后续可视化。通过本次实验，我体会到良好的抽象和接口设计能够大幅降低团队协作的沟通成本——清晰定义的数据模型使得人员B和C能够专注于归约算法本身，而无需关心底层数据表示的细节。此外，我也认识到NP完全问题之间的内在联系：3SAT作为``第一个''NP完全问题，其归约构造体现了计算复杂性理论的核心思想——通过多项式时间的结构映射，将一个问题的解转化为另一个问题的解。
 
 \textbf{人员B}：通过本次实验，我深入理解了NP完全性理论中多项式时间归约的核心思想。3SAT到Vertex Cover的归约是一个经典且精巧的构造：它利用图的结构约束（每个三角形至少需要2个顶点覆盖）来模拟逻辑约束（每个子句至少需要1个文字为真），并通过冲突边来保证布尔赋值的一致性。在实现过程中，我体会到归约算法设计中``正确性证明''的重要性——归约不仅是数据的转换，更是问题结构的映射，必须严格证明双向蕴含关系才能确保归约的有效性。此外，本次实验也锻炼了我在现有代码框架上协同开发的能力，通过清晰的接口定义和文档规范，有效提升了团队协作效率。
 

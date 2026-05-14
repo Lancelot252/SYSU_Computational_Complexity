@@ -17,6 +17,10 @@ import os
 import sys
 from pathlib import Path
 
+# 设置标准输出编码为UTF-8，解决Windows终端中文和Unicode符号显示问题
+if sys.platform == 'win32':
+    sys.stdout.reconfigure(encoding='utf-8')
+
 # 确保从项目根目录运行
 # 获取脚本所在目录 (src目录)
 script_dir = os.path.dirname(os.path.abspath(__file__))

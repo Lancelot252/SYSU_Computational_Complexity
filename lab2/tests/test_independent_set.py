@@ -477,6 +477,10 @@ def generate_output_images():
     1. 课件测试用例
     2. 自行设计测试用例（至少5个子句）
     """
+    import io
+    # 设置stdout编码为UTF-8，解决Windows终端中文显示问题
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    
     print("\n" + "="*60)
     print("开始生成独立集归约结果展示图片...")
     print("="*60 + "\n")
@@ -542,6 +546,66 @@ def generate_output_images():
             "(" + " ∨ ".join(str(lit) for lit in clause) + ")"
             for clause in formula
         )
+        
+        # ==================== 终端输出实例信息 ====================
+        print("\n" + "=" * 70)
+        print(f"【{description}】")
+        print("=" * 70)
+        print(f"3SAT公式: {formula_str}")
+        print(f"子句数 m = {len(formula)}")
+        print(f"变量集: {sorted(formula.get_variables())}")
+        print("-" * 70)
+        print(f"归约结果:")
+        print(f"  节点数 |V| = {graph.node_count()} (应为 3m = {3 * len(formula)})")
+        print(f"  边数 |E| = {graph.edge_count()}")
+        print(f"  独立集大小 n = {n} (应为 m = {len(formula)})")
+        print("-" * 70)
+        
+        # 输出节点信息
+        labels = graph.get_node_labels()
+        print("节点列表:")
+        for node_id in sorted(labels.keys()):
+            clause_idx, lit_str = node_clause_info.get(node_id, (None, str(labels[node_id])))
+            if clause_idx is not None:
+                print(f"  节点{node_id}: 子句{clause_idx + 1}的文字 '{lit_str}'")
+            else:
+                print(f"  节点{node_id}: {labels[node_id]}")
+        
+        print("-" * 70)
+        
+        # 区分并输出边信息
+        triangle_edges = []
+        conflict_edges = []
+        for u, v in graph.edges():
+            u_info = node_clause_info.get(u)
+            v_info = node_clause_info.get(v)
+            if u_info is not None and v_info is not None:
+                if u_info[0] == v_info[0]:
+                    triangle_edges.append((u, v))
+                else:
+                    conflict_edges.append((u, v, u_info[1], v_info[1]))
+        
+        print("三角形内部边（同一子句内的边）:")
+        for u, v in triangle_edges:
+            u_info = node_clause_info.get(u, (None, str(labels.get(u, u))))
+            v_info = node_clause_info.get(v, (None, str(labels.get(v, v))))
+            print(f"  ({u}, {v}): {u_info[1]} -- {v_info[1]} [子句{u_info[0]+1}]")
+        
+        print("-" * 70)
+        print("冲突边（互补文字之间的边）:")
+        for u, v, u_lit, v_lit in conflict_edges:
+            print(f"  ({u}, {v}): {u_lit} -- {v_lit}")
+        
+        print("-" * 70)
+        print("三角形结构验证:")
+        for i in range(len(formula)):
+            base = i * 3
+            edges_in_triangle = [(u, v) for u, v in triangle_edges
+                                  if u >= base and u < base + 3 and v >= base and v < base + 3]
+            print(f"  子句{i+1} (节点{base},{base+1},{base+2}): {len(edges_in_triangle)}条内部边")
+        
+        print("=" * 70)
+        # ==================== 终端输出结束 ====================
         
         # 如果description不为空，在前面添加标题
         if description:

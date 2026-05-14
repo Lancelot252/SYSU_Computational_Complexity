@@ -61,9 +61,8 @@ pip install networkx matplotlib
 ### 1. 运行主程序
 
 ```bash
-python src/main.py --task 1 --input test/task1_course_example.txt
-python src/main.py --task 2 --input test/task2_course_example.txt
-python src/main.py --all
+python tests/test_independent_set.py
+python tests/test_vertex_cover.py
 ```
 
 ### 2. 解析3SAT公式
