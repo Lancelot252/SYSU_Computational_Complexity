@@ -27,6 +27,16 @@ if sys.platform == 'win32':
 script_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(script_dir)
 
+# 将项目根目录添加到路径
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+from src.max3sat.parser import parse_formula, parse_random_config, generate_random_formula
+from src.max3sat.solver import solve as max3sat_solve, print_result as max3sat_print
+from src.metric_tsp.graph import parse_cities, build_complete_graph
+from src.metric_tsp.solver import solve as tsp_solve, print_result as tsp_print
+from src.utils.timer import Timer
+
 
 def run_max3sat(input_file: str, mode: str = "fixed") -> None:
     """
@@ -36,8 +46,64 @@ def run_max3sat(input_file: str, mode: str = "fixed") -> None:
         input_file: 输入文件路径
         mode: "fixed" 表示读取已有公式，"random" 表示根据配置随机生成
     """
-    # TODO: 实现任务1的运行逻辑
-    raise NotImplementedError("MAX-3SAT 求解器尚未实现")
+    input_path = os.path.join(project_root, input_file)
+
+    if mode == "random":
+        # 从配置文件随机生成公式
+        config = parse_random_config(input_path)
+        print("=" * 60)
+        print("MAX-3SAT 随机生成模式")
+        print("=" * 60)
+        print(f"配置：变量数={config['number_of_variables']}, "
+              f"子句数={config['number_of_clauses']}, "
+              f"种子={config['seed']}")
+
+        output_file = config.get("output_file")
+        if output_file:
+            output_path = os.path.join(project_root, output_file)
+        else:
+            output_path = None
+
+        formula = generate_random_formula(
+            num_variables=config["number_of_variables"],
+            num_clauses=config["number_of_clauses"],
+            seed=config["seed"],
+            output_file=output_path,
+        )
+        if output_path:
+            print(f"随机公式已保存至: {output_path}")
+    else:
+        # 从文件读取已有公式
+        formula = parse_formula(input_path)
+
+    print()
+    result = max3sat_solve(formula)
+    max3sat_print(formula, result)
+
+    # 保存结果到 output 目录
+    output_dir = os.path.join(project_root, "output", "max3sat")
+    os.makedirs(output_dir, exist_ok=True)
+    base_name = Path(input_file).stem
+    result_path = os.path.join(output_dir, f"{base_name}_result.txt")
+    _save_max3sat_result(formula, result, result_path)
+    print(f"\n结果已保存至: {result_path}")
+
+
+def _save_max3sat_result(formula, result, filepath: str) -> None:
+    """将 MAX-3SAT 结果保存到文件"""
+    with open(filepath, "w", encoding="utf-8") as f:
+        f.write(f"输入公式：\n{formula}\n")
+        f.write(f"变量数量：{formula.num_variables}\n")
+        f.write(f"子句数量：{formula.num_clauses}\n")
+        f.write(f"目标满足子句数量：{result.threshold}\n")
+        f.write(f"找到的变量赋值：\n")
+        for var in formula.variables:
+            f.write(f"  {var} = {result.assignment[var]}\n")
+        f.write(f"满足的子句数量：{result.satisfied_count} / {result.total_clauses}\n")
+        satisfied_names = [f"C{i}" for i in result.satisfied_indices]
+        f.write(f"满足的子句编号：{', '.join(satisfied_names)}\n")
+        f.write(f"随机循环次数：{result.iterations}\n")
+        f.write(f"运行时间：{result.elapsed_time:.4f} 秒\n")
 
 
 def run_metric_tsp(input_file: str) -> None:
@@ -47,14 +113,79 @@ def run_metric_tsp(input_file: str) -> None:
     Args:
         input_file: 输入文件路径（城市坐标）
     """
-    # TODO: 实现任务2的运行逻辑
-    raise NotImplementedError("METRIC-TSP 求解器尚未实现")
+    input_path = os.path.join(project_root, input_file)
+
+    # 解析城市坐标
+    cities = parse_cities(input_path)
+
+    # 构造带权完全图
+    graph = build_complete_graph(cities)
+
+    # 运行 2-近似算法
+    root = graph.city_names[0]
+    result = tsp_solve(graph, root)
+    tsp_print(graph, result, root)
+
+    # 保存结果到 output 目录
+    output_dir = os.path.join(project_root, "output", "metric_tsp")
+    os.makedirs(output_dir, exist_ok=True)
+    base_name = Path(input_file).stem
+    result_path = os.path.join(output_dir, f"{base_name}_result.txt")
+    _save_tsp_result(graph, result, root, result_path)
+    print(f"\n结果已保存至: {result_path}")
+
+
+def _save_tsp_result(graph, result, root: str, filepath: str) -> None:
+    """将 METRIC-TSP 结果保存到文件"""
+    with open(filepath, "w", encoding="utf-8") as f:
+        f.write(f"城市数量：{graph.num_cities}\n")
+        f.write(f"根节点：{root}\n")
+        f.write(f"最小生成树 MST 边集：\n")
+        for edge in result.mst_edges:
+            f.write(f"  {edge}\n")
+        f.write(f"MST 总代价：{result.mst_cost}\n")
+        f.write(f"DFS 遍历顺序：\n")
+        f.write(f"  {' -> '.join(result.dfs_order)}\n")
+        f.write(f"TSP 近似回路：\n")
+        f.write(f"  {' -> '.join(result.tsp_tour)}\n")
+        f.write(f"TSP 近似回路总代价：{result.tsp_cost}\n")
+        f.write(f"2 * MST 总代价：{2 * result.mst_cost}\n")
+        f.write(f"最优 TSP 回路：\n")
+        f.write(f"  {' -> '.join(result.optimal_tour)}\n")
+        f.write(f"最优 TSP 回路总代价：{result.optimal_cost}\n")
+        f.write(f"近似比例：{result.tsp_cost} / {result.optimal_cost} = {result.approximation_ratio:.3f}\n")
+        f.write(f"运行时间：{result.elapsed_time:.3f}s\n")
 
 
 def run_all() -> None:
     """运行所有测试用例"""
-    # TODO: 实现批量运行逻辑
-    raise NotImplementedError("批量运行尚未实现")
+    print("=" * 60)
+    print("运行所有测试用例")
+    print("=" * 60)
+
+    # 任务1：固定测试用例
+    fixed_path = os.path.join(project_root, "test", "max3sat", "fixed.txt")
+    if os.path.exists(fixed_path):
+        print("\n" + "=" * 60)
+        print("任务1 - 固定测试用例")
+        print("=" * 60)
+        run_max3sat(fixed_path, mode="fixed")
+
+    # 任务1：随机生成测试用例
+    random_config_path = os.path.join(project_root, "test", "max3sat", "random_config.txt")
+    if os.path.exists(random_config_path):
+        print("\n" + "=" * 60)
+        print("任务1 - 随机生成测试用例")
+        print("=" * 60)
+        run_max3sat(random_config_path, mode="random")
+
+    # 任务2：METRIC-TSP 测试
+    tsp_path = os.path.join(project_root, "test", "metric_tsp", "sample.txt")
+    if os.path.exists(tsp_path):
+        print("\n" + "=" * 60)
+        print("任务2 - METRIC-TSP 测试")
+        print("=" * 60)
+        run_metric_tsp(tsp_path)
 
 
 def main() -> int:

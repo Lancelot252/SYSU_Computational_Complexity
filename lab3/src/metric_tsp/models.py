@@ -6,6 +6,8 @@ METRIC-TSP 数据模型
 
 from __future__ import annotations
 
+import math
+
 
 class City:
     """
@@ -34,8 +36,9 @@ class City:
         Returns:
             取整后的欧氏距离
         """
-        # TODO: 实现
-        raise NotImplementedError
+        dx = self.x - other.x
+        dy = self.y - other.y
+        return math.ceil(math.sqrt(dx * dx + dy * dy))
 
     def __repr__(self) -> str:
         return f"{self.name}({self.x}, {self.y})"
@@ -59,6 +62,14 @@ class Edge:
     def __repr__(self) -> str:
         return f"({self.u}, {self.v}, {self.weight})"
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Edge):
+            return NotImplemented
+        return self.u == other.u and self.v == other.v and self.weight == other.weight
+
+    def __hash__(self) -> int:
+        return hash((self.u, self.v, self.weight))
+
 
 class WeightedGraph:
     """
@@ -70,13 +81,26 @@ class WeightedGraph:
         cities: 城市列表
         edges: 边列表
         adjacency: 邻接表 {城市名: [(邻居城市名, 边权), ...]}
+        _weight_map: 边权映射 {(城市1, 城市2): 边权}
     """
 
     def __init__(self, cities: list[City]) -> None:
         self.cities = cities
         self.edges: list[Edge] = []
-        self.adjacency: dict[str, list[tuple[str, int]]] = {}
-        # TODO: 构造完全图
+        self.adjacency: dict[str, list[tuple[str, int]]] = {c.name: [] for c in cities}
+        self._weight_map: dict[tuple[str, str], int] = {}
+
+        # 构造完全图
+        for i in range(len(cities)):
+            for j in range(i + 1, len(cities)):
+                c1, c2 = cities[i], cities[j]
+                w = c1.euclidean_distance(c2)
+                edge = Edge(c1.name, c2.name, w)
+                self.edges.append(edge)
+                self.adjacency[c1.name].append((c2.name, w))
+                self.adjacency[c2.name].append((c1.name, w))
+                self._weight_map[(c1.name, c2.name)] = w
+                self._weight_map[(c2.name, c1.name)] = w
 
     def get_weight(self, u: str, v: str) -> int:
         """
@@ -89,8 +113,7 @@ class WeightedGraph:
         Returns:
             边权
         """
-        # TODO: 实现
-        raise NotImplementedError
+        return self._weight_map.get((u, v), 0)
 
     @property
     def city_names(self) -> list[str]:

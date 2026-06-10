@@ -11,14 +11,22 @@ def build_adjacency_list(edges: list[Edge]) -> dict[str, list[str]]:
     """
     根据边集构造无向图邻接表
 
+    邻接表中邻居按字母序排列，确保遍历顺序确定性。
+
     Args:
         edges: 边列表
 
     Returns:
-        邻接表 {节点: [邻居列表]}
+        邻接表 {节点: [邻居列表（已排序）]}
     """
-    # TODO: 实现
-    raise NotImplementedError
+    adj: dict[str, list[str]] = {}
+    for edge in edges:
+        adj.setdefault(edge.u, []).append(edge.v)
+        adj.setdefault(edge.v, []).append(edge.u)
+    # 对每个节点的邻居排序，保证遍历顺序确定性
+    for key in adj:
+        adj[key].sort()
+    return adj
 
 
 def dfs_traversal(
@@ -28,6 +36,8 @@ def dfs_traversal(
     """
     从根节点开始对 MST 进行 DFS 遍历
 
+    返回 DFS 首次访问顶点的顺序列表。
+
     Args:
         edges: MST 边列表
         root: 根节点名称
@@ -35,8 +45,19 @@ def dfs_traversal(
     Returns:
         DFS 首次访问顶点的顺序列表
     """
-    # TODO: 实现
-    raise NotImplementedError
+    adj = build_adjacency_list(edges)
+    visited: set[str] = set()
+    order: list[str] = []
+
+    def _dfs(node: str) -> None:
+        visited.add(node)
+        order.append(node)
+        for neighbor in adj.get(node, []):
+            if neighbor not in visited:
+                _dfs(neighbor)
+
+    _dfs(root)
+    return order
 
 
 def build_tsp_tour(dfs_order: list[str]) -> list[str]:
@@ -52,5 +73,4 @@ def build_tsp_tour(dfs_order: list[str]) -> list[str]:
     Returns:
         TSP 近似回路（闭合）
     """
-    # TODO: 实现
-    raise NotImplementedError
+    return dfs_order + [dfs_order[0]]

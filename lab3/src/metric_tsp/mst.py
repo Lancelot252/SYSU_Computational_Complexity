@@ -22,8 +22,9 @@ class UnionFind:
 
     def find(self, x: int) -> int:
         """查找根节点（带路径压缩）"""
-        # TODO: 实现
-        raise NotImplementedError
+        if self.parent[x] != x:
+            self.parent[x] = self.find(self.parent[x])
+        return self.parent[x]
 
     def union(self, x: int, y: int) -> bool:
         """
@@ -32,8 +33,15 @@ class UnionFind:
         Returns:
             是否成功合并（若已在同一集合则返回 False）
         """
-        # TODO: 实现
-        raise NotImplementedError
+        rx, ry = self.find(x), self.find(y)
+        if rx == ry:
+            return False
+        if self.rank[rx] < self.rank[ry]:
+            rx, ry = ry, rx
+        self.parent[ry] = rx
+        if self.rank[rx] == self.rank[ry]:
+            self.rank[rx] += 1
+        return True
 
 
 def kruskal(graph: WeightedGraph) -> list[Edge]:
@@ -51,8 +59,24 @@ def kruskal(graph: WeightedGraph) -> list[Edge]:
     Returns:
         MST 边列表
     """
-    # TODO: 实现
-    raise NotImplementedError
+    # 建立城市名到索引的映射
+    city_to_idx = {name: i for i, name in enumerate(graph.city_names)}
+
+    # 按权重排序所有边
+    sorted_edges = sorted(graph.edges, key=lambda e: (e.weight, e.u, e.v))
+
+    uf = UnionFind(graph.num_cities)
+    mst_edges: list[Edge] = []
+
+    for edge in sorted_edges:
+        u_idx = city_to_idx[edge.u]
+        v_idx = city_to_idx[edge.v]
+        if uf.union(u_idx, v_idx):
+            mst_edges.append(edge)
+            if len(mst_edges) == graph.num_cities - 1:
+                break
+
+    return mst_edges
 
 
 def mst_total_cost(mst_edges: list[Edge]) -> int:
@@ -65,5 +89,4 @@ def mst_total_cost(mst_edges: list[Edge]) -> int:
     Returns:
         MST 总代价
     """
-    # TODO: 实现
-    raise NotImplementedError
+    return sum(e.weight for e in mst_edges)
