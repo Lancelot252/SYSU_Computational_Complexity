@@ -70,7 +70,7 @@ python tests/test_vertex_cover.py
 ```python
 from src.parsers import parse_txt_file, parse_cnf_string, parse_dimacs
 
-# txt格式（本次作业规定格式）
+# txt格式
 formula = parse_txt_file("test/task1_course_example.txt")
 
 # 数学符号格式
@@ -167,7 +167,7 @@ python tests/test_cases.py
 
 ## 分工说明
 
-### 人员A（已完成）
+### 人员A
 - 创建项目框架和目录结构
 - 实现公共数据结构（`Literal`, `Clause`, `Formula3SAT`, `Graph`）
 - 实现CNF解析器（支持多种格式）
@@ -180,7 +180,7 @@ python tests/test_cases.py
 - 编写文档（README.md, API.md）
 - 创建实验报告框架
 
-### 人员B（待实现）
+### 人员B
 需要实现以下函数（位于 `src/reductions/vertex_cover.py`）：
 
 1. `reduce_3sat_to_vertex_cover(formula)` - 主归约函数
@@ -196,7 +196,7 @@ python tests/test_cases.py
 **正确性**:
 - φ 可满足 ⟺ G 存在大小不超过 k 的点覆盖
 
-### 人员C（待实现）
+### 人员C
 需要实现以下函数（位于 `src/reductions/independent_set.py`）：
 
 1. `reduce_3sat_to_independent_set(formula)` - 主归约函数

@@ -1,0 +1,4 @@
+number_of_variables 8
+number_of_clauses 20
+seed 2026
+output_file random_8_20.txt
