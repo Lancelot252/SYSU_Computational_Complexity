@@ -5,6 +5,7 @@ MAX-3SAT 数据模型
 """
 
 import math
+from typing import Dict, List, Set
 
 
 class Literal:
@@ -20,7 +21,7 @@ class Literal:
         self.var = var
         self.negated = negated
 
-    def evaluate(self, assignment: dict[str, bool]) -> bool:
+    def evaluate(self, assignment: Dict[str, bool]) -> bool:
         """
         在给定变量赋值下求值
 
@@ -55,13 +56,13 @@ class Clause:
         index: 子句编号（从1开始）
     """
 
-    def __init__(self, literals: list[Literal], index: int) -> None:
+    def __init__(self, literals: List[Literal], index: int) -> None:
         if len(literals) != 3:
             raise ValueError(f"每个子句必须恰好包含3个文字，当前有 {len(literals)} 个")
         self.literals = literals
         self.index = index
 
-    def is_satisfied(self, assignment: dict[str, bool]) -> bool:
+    def is_satisfied(self, assignment: Dict[str, bool]) -> bool:
         """
         判断在给定赋值下该子句是否被满足
 
@@ -86,15 +87,15 @@ class Formula:
         variables: 变量名集合（有序）
     """
 
-    def __init__(self, clauses: list[Clause]) -> None:
+    def __init__(self, clauses: List[Clause]) -> None:
         self.clauses = clauses
         # 保持变量顺序一致（按变量名中的数字排序）
-        var_set: set[str] = set()
+        var_set: Set[str] = set()
         for clause in clauses:
             for lit in clause.literals:
                 var_set.add(lit.var)
         # 按变量编号排序
-        self.variables: list[str] = sorted(
+        self.variables: List[str] = sorted(
             var_set, key=lambda v: int(v[1:]) if v[1:].isdigit() else v
         )
 
@@ -113,7 +114,7 @@ class Formula:
         """目标满足子句数量：⌈7/8 * m⌉"""
         return math.ceil(7 / 8 * self.num_clauses)
 
-    def count_satisfied(self, assignment: dict[str, bool]) -> int:
+    def count_satisfied(self, assignment: Dict[str, bool]) -> int:
         """
         统计在给定赋值下被满足的子句数量
 
@@ -125,7 +126,7 @@ class Formula:
         """
         return sum(1 for clause in self.clauses if clause.is_satisfied(assignment))
 
-    def get_satisfied_indices(self, assignment: dict[str, bool]) -> list[int]:
+    def get_satisfied_indices(self, assignment: Dict[str, bool]) -> List[int]:
         """
         获取在给定赋值下被满足的子句编号列表
 

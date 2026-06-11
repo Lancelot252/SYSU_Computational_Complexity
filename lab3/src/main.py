@@ -49,31 +49,37 @@ def run_max3sat(input_file: str, mode: str = "fixed") -> None:
     input_path = os.path.join(project_root, input_file)
 
     if mode == "random":
-        # 从配置文件随机生成公式
-        config = parse_random_config(input_path)
+        configs = parse_random_config(input_path)
         print("=" * 60)
         print("MAX-3SAT 随机生成模式")
         print("=" * 60)
-        print(f"配置：变量数={config['number_of_variables']}, "
-              f"子句数={config['number_of_clauses']}, "
-              f"种子={config['seed']}")
 
-        output_file = config.get("output_file")
-        if output_file:
-            output_path = os.path.join(project_root, output_file)
-        else:
-            output_path = None
+        output_dir = os.path.join(project_root, "output", "max3sat")
+        os.makedirs(output_dir, exist_ok=True)
 
-        formula = generate_random_formula(
-            num_variables=config["number_of_variables"],
-            num_clauses=config["number_of_clauses"],
-            seed=config["seed"],
-            output_file=output_path,
-        )
-        if output_path:
-            print(f"随机公式已保存至: {output_path}")
+        for idx, config in enumerate(configs, start=1):
+            print(f"\n配置 {idx}: 变量数={config['number_of_variables']}, 子句数={config['number_of_clauses']}, 种子={config['seed']}")
+            output_file = config.get("output_file")
+            output_path = os.path.join(project_root, output_file) if output_file else None
+            formula = generate_random_formula(
+                num_variables=config["number_of_variables"],
+                num_clauses=config["number_of_clauses"],
+                seed=config["seed"],
+                output_file=output_path,
+            )
+            if output_path:
+                print(f"随机公式已保存至: {output_path}")
+
+            print()
+            result = max3sat_solve(formula)
+            max3sat_print(formula, result)
+
+            base_name = Path(output_file or f"random_{config['number_of_variables']}_{config['number_of_clauses']}_seed{config['seed']}.txt").stem
+            result_path = os.path.join(output_dir, f"{base_name}_result.txt")
+            _save_max3sat_result(formula, result, result_path)
+            print(f"\n结果已保存至: {result_path}")
+        return
     else:
-        # 从文件读取已有公式
         formula = parse_formula(input_path)
 
     print()

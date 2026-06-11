@@ -8,6 +8,7 @@ MAX-3SAT 公式解析器与随机生成器
 
 import random
 import re
+from typing import Dict, List
 
 from src.max3sat.models import Clause, Formula, Literal
 
@@ -78,11 +79,11 @@ def parse_formula(filepath: str) -> Formula:
     return Formula(clauses)
 
 
-def parse_random_config(filepath: str) -> dict:
+def parse_random_config(filepath: str) -> List[dict]:
     """
-    解析随机生成配置文件
+    解析随机生成配置文件，支持多个配置块（用空行分隔）
 
-    配置文件格式：
+    每个配置块示例：
         number_of_variables 8
         number_of_clauses 20
         seed 2026
@@ -92,37 +93,48 @@ def parse_random_config(filepath: str) -> dict:
         filepath: 配置文件路径
 
     Returns:
-        包含配置项的字典
+        List[dict]: 配置项字典列表
     """
-    config: dict = {}
+    configs: list[dict] = []
+    current: dict[str, str] = {}
+
     with open(filepath, "r", encoding="utf-8") as f:
         for line in f:
+            raw = line
             line = line.strip()
             if not line or line.startswith("#"):
+                if current:
+                    configs.append(current)
+                    current = {}
                 continue
             parts = line.split()
             if len(parts) != 2:
-                raise ValueError(f"配置行格式错误: '{line}'")
+                raise ValueError(f"配置行格式错误: '{raw.strip()}'")
             key, value = parts
-            config[key] = value
+            current[key] = value
 
-    # 验证必填字段
+    if current:
+        configs.append(current)
+
+    if not configs:
+        raise ValueError("随机配置文件中未找到任何配置块")
+
     required_keys = ["number_of_variables", "number_of_clauses", "seed"]
-    for key in required_keys:
-        if key not in config:
-            raise ValueError(f"缺少必填配置项: {key}")
+    validated: list[dict] = []
+    for config in configs:
+        for key in required_keys:
+            if key not in config:
+                raise ValueError(f"缺少必填配置项: {key}")
+        config["number_of_variables"] = int(config["number_of_variables"])
+        config["number_of_clauses"] = int(config["number_of_clauses"])
+        config["seed"] = int(config["seed"])
+        if config["number_of_variables"] < 4:
+            raise ValueError("变量数量必须 >= 4")
+        if config["number_of_clauses"] < 4:
+            raise ValueError("子句数量必须 >= 4")
+        validated.append(config)
 
-    # 类型转换与验证
-    config["number_of_variables"] = int(config["number_of_variables"])
-    config["number_of_clauses"] = int(config["number_of_clauses"])
-    config["seed"] = int(config["seed"])
-
-    if config["number_of_variables"] < 4:
-        raise ValueError("变量数量必须 >= 4")
-    if config["number_of_clauses"] < 4:
-        raise ValueError("子句数量必须 >= 4")
-
-    return config
+    return validated
 
 
 def generate_random_formula(
