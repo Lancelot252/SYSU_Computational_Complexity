@@ -1,0 +1,30 @@
+number_of_variables 6
+number_of_clauses 20
+seed 2026
+output_file output/max3sat/random_6_20.txt
+
+# 固定随机种子 2026，仅改变变量数量和子句数量，用于观察规模变化时性能变化
+number_of_variables 50
+number_of_clauses 200
+seed 2026
+output_file output/max3sat/random_50_200_seed2026.txt
+
+number_of_variables 100
+number_of_clauses 400
+seed 2026
+output_file output/max3sat/random_100_400_seed2026.txt
+
+number_of_variables 150
+number_of_clauses 600
+seed 2026
+output_file output/max3sat/random_150_600_seed2026.txt
+
+number_of_variables 200
+number_of_clauses 800
+seed 2026
+output_file output/max3sat/random_200_800_seed2026.txt
+
+number_of_variables 250
+number_of_clauses 1000
+seed 2026
+output_file output/max3sat/random_250_1000_seed2026.txt
